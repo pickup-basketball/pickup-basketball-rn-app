@@ -7,23 +7,21 @@ import {
 } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 import { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import type { StackNavigationProp } from "@react-navigation/stack";
-
-type RootStackParamList = {
-  Login: undefined;
-  Signup: undefined;
-};
-
-type NavigationProp = StackNavigationProp<RootStackParamList>;
+import SignupLink from "./SignupLink";
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberLogin, setRememberLogin] = useState(false);
-  const navigation = useNavigation<NavigationProp>();
 
   return (
     <View style={styles.form}>
+      <View style={styles.header}>
+        <Text style={styles.title}>로그인</Text>
+        <Text style={styles.subTitle}>
+          PICKUP과 함께 새로운 농구 친구를 만나보세요.
+        </Text>
+      </View>
+
       {/* 이메일 입력 */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>이메일</Text>
@@ -94,20 +92,30 @@ const LoginForm = () => {
         <Text style={styles.kakaoButtonText}>카카오로 계속하기</Text>
       </TouchableOpacity>
 
-      {/* 회원가입 링크 */}
-      <View style={styles.signupContainer}>
-        <Text style={styles.signupText}>아직 계정이 없으신가요?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-          <Text style={styles.signupLink}>회원가입하기</Text>
-        </TouchableOpacity>
-      </View>
+      <SignupLink />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   form: {
+    padding: 20,
+    paddingTop: 0,
     width: "100%",
+  },
+  header: {
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 30,
+    color: "#fff",
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  subTitle: {
+    color: "#999",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   inputContainer: {
     marginBottom: 20,
@@ -190,6 +198,7 @@ const styles = StyleSheet.create({
   dividerText: {
     color: "#666",
     marginHorizontal: 10,
+    fontWeight: "bold",
   },
   socialButton: {
     backgroundColor: "#333",
@@ -201,6 +210,7 @@ const styles = StyleSheet.create({
   socialButtonText: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
   },
   kakaoButton: {
     backgroundColor: "#FEE500",
@@ -208,19 +218,7 @@ const styles = StyleSheet.create({
   kakaoButtonText: {
     color: "#000",
     fontSize: 16,
-  },
-  signupContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  signupText: {
-    color: "#666",
-  },
-  signupLink: {
-    color: "#ff6b00",
-    marginLeft: 8,
+    fontWeight: "bold",
   },
 });
 
