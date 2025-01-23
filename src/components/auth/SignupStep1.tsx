@@ -1,68 +1,77 @@
-import React, { useState } from "react";
-import { SafeAreaView, StyleSheet, View } from "react-native";
-import SignupStep1 from "../../components/auth/SignupStep1";
-import SignupStep2 from "../../components/auth/SignupStep2";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TSignupData } from "../../components/auth/SignupStep2";
-import Header from "../../components/common/Header";
-import SignupTitle from "../../components/auth/SignupTitle";
-import LoginLink from "../../components/auth/LoginLink";
+import { Navigation } from "lucide-react-native";
+import { useState } from "react";
+import {
+  Text,
+  SafeAreaView,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
 
-// 네비게이션에서 사용할 스크린들의 타입 정의
-export type RootStackParamList = {
-  Start: undefined;
-  Login: undefined;
-  Signup: undefined;
-  Guide: undefined;
-  Matching: undefined;
-  Courts: undefined;
+// SignupStep1.tsx
+export type TSignupStep1Props = {
+  onNext: (data: TStep1Data) => void;
 };
 
-// 회원가입 1단계에서 입력 정보 타입
-type TStep1Data = {
+export type TStep1Data = {
   email: string;
   password: string;
   nickname: string;
 };
 
-const SignupScreen = () => {
-  const [step, setStep] = useState(1);
-  const [signupData, setSignupData] = useState<TStep1Data | null>(null);
+const SignupStep1 = ({ onNext }: TSignupStep1Props) => {
+  const [formData, setFormData] = useState<TStep1Data>({
+    email: "",
+    password: "",
+    nickname: "",
+  });
 
-  const handleStep1Complete = (data: TStep1Data) => {
-    setSignupData(data);
-    setStep(2);
-  };
-  const handleSignup = async (data: TSignupData) => {
-    return { success: true };
-  };
-
-  const handleSignupComplete = async (data: TSignupData) => {
-    try {
-      const result = await handleSignup(data);
-
-      if (result.success) await AsyncStorage.setItem("isLoggedIn", "true");
-    } catch (error) {
-      console.error("회원가입 실패:", error);
-    }
+  const handleNext = () => {
+    // 유효성 검사 후
+    onNext(formData);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Header />
-      <View style={styles.formContainer}>
-        <SignupTitle step={step} />
+    <SafeAreaView>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>이메일</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.email}
+          onChangeText={(text) =>
+            setFormData((prev) => ({ ...prev, email: text }))
+          }
+          placeholder="example@gmail.com"
+          placeholderTextColor="#666"
+        />
+        <Text style={styles.label}>비밀번호</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="8자리 이상 입력해주세요"
+          placeholderTextColor="#666"
+          secureTextEntry
+        />
+        <Text style={styles.label}>비밀번호 확인</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="비밀번호를 다시 입력해주세요."
+          placeholderTextColor="#666"
+          secureTextEntry
+        />
+        <Text style={styles.label}>닉네임</Text>
+        <TextInput
+          style={styles.nickNameInput}
+          placeholder="사용하실 닉네임을 입력해주세요."
+          placeholderTextColor="#A0A0A0"
+          secureTextEntry
+        />
+      </View>
 
-        {step === 1 ? (
-          <SignupStep1 onNext={handleStep1Complete} />
-        ) : (
-          <SignupStep2
-            step1Data={signupData!}
-            onPrevious={() => setStep(1)}
-            onSubmit={handleSignupComplete}
-          />
-        )}
-        <LoginLink />
+      <View style={styles.signupStageContainer}>
+        <TouchableOpacity style={[styles.signupButton]} onPress={handleNext}>
+          <Text style={styles.signupButtonText}>다음</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -87,10 +96,6 @@ const styles = StyleSheet.create({
   headerButton: {
     color: "#fff",
     fontSize: 16,
-  },
-  formContainer: {
-    flex: 1,
-    padding: 20,
   },
   titleContainer: {
     marginTop: -10,
@@ -130,6 +135,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   signupButton: {
+    flex: 1,
     backgroundColor: "#ff6b00",
     borderRadius: 8,
     padding: 15,
@@ -181,6 +187,7 @@ const styles = StyleSheet.create({
   mainButtonText: {
     color: "#fff",
     fontSize: 16,
+    bottom: 1,
   },
   signupStageContainer: {
     flexDirection: "row",
@@ -204,4 +211,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignupScreen;
+export default SignupStep1;

@@ -1,70 +1,29 @@
-import React, { useState } from "react";
-import { SafeAreaView, StyleSheet, View } from "react-native";
-import SignupStep1 from "../../components/auth/SignupStep1";
-import SignupStep2 from "../../components/auth/SignupStep2";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TSignupData } from "../../components/auth/SignupStep2";
-import Header from "../../components/common/Header";
-import SignupTitle from "../../components/auth/SignupTitle";
-import LoginLink from "../../components/auth/LoginLink";
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
 
-// 네비게이션에서 사용할 스크린들의 타입 정의
-export type RootStackParamList = {
-  Start: undefined;
-  Login: undefined;
-  Signup: undefined;
-  Guide: undefined;
-  Matching: undefined;
-  Courts: undefined;
-};
-
-// 회원가입 1단계에서 입력 정보 타입
-type TStep1Data = {
-  email: string;
-  password: string;
-  nickname: string;
-};
-
-const SignupScreen = () => {
-  const [step, setStep] = useState(1);
-  const [signupData, setSignupData] = useState<TStep1Data | null>(null);
-
-  const handleStep1Complete = (data: TStep1Data) => {
-    setSignupData(data);
-    setStep(2);
-  };
-  const handleSignup = async (data: TSignupData) => {
-    return { success: true };
-  };
-
-  const handleSignupComplete = async (data: TSignupData) => {
-    try {
-      const result = await handleSignup(data);
-
-      if (result.success) await AsyncStorage.setItem("isLoggedIn", "true");
-    } catch (error) {
-      console.error("회원가입 실패:", error);
-    }
-  };
-
+const SignupTitle = ({ step }: { step: number }) => {
   return (
-    <SafeAreaView style={styles.container}>
-      <Header />
-      <View style={styles.formContainer}>
-        <SignupTitle step={step} />
-
+    <>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>회원가입</Text>
         {step === 1 ? (
-          <SignupStep1 onNext={handleStep1Complete} />
+          <Text style={styles.subtitle}>기본 정보를 입력해주세요.</Text>
         ) : (
-          <SignupStep2
-            step1Data={signupData!}
-            onPrevious={() => setStep(1)}
-            onSubmit={handleSignupComplete}
-          />
+          <Text style={styles.subtitle}>농구 관련 정보를 입력해주세요.</Text>
         )}
-        <LoginLink />
       </View>
-    </SafeAreaView>
+
+      <View style={styles.signupStageContainer}>
+        {[1, 2].map((index) => (
+          <View
+            key={index}
+            style={
+              step === index ? styles.currentSignupStage : styles.signupStage
+            }
+          />
+        ))}
+      </View>
+    </>
   );
 };
 
@@ -204,4 +163,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignupScreen;
+export default SignupTitle;
