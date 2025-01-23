@@ -5,10 +5,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import StartScreen from "./src/screens/auth/StartScreen";
 import LoginScreen from "./src/screens/auth/LoginScreen";
-import SignupScreen from "./src/screens/auth/SignupScreen";
+import SignupScreen, {
+  RootStackParamList,
+} from "./src/screens/auth/SignupScreen";
 import MatchingScreen from "./src/screens/main/MatchingScreen";
+import CourtsScreen from "./src/screens/main/CourtsScreen";
+import GuideScreen from "./src/screens/main/GuideScreen";
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<RootStackParamList>();
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -44,35 +48,47 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {isLoggedIn ? (
-          // 로그인된 상태
+        {/* {isLoggedIn ? (
+          // 로그인된 상태 */}
+        <>
           <Stack.Screen
-            name="Main"
+            name="Guide"
+            component={GuideScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Matching"
             component={MatchingScreen}
             options={{ headerShown: false }}
           />
-        ) : (
-          // 비로그인 상태
-          <>
-            {!hasSeenIntro && (
-              <Stack.Screen
-                name="Start"
-                component={StartScreen}
-                options={{ headerShown: false }}
-              />
-            )}
+          <Stack.Screen
+            name="Courts"
+            component={CourtsScreen}
+            options={{ headerShown: false }}
+          />
+        </>
+        {/* ) : (
+          // 비로그인 상태 */}
+        <>
+          {!hasSeenIntro && (
             <Stack.Screen
-              name="Login"
-              component={LoginScreen}
+              name="Start"
+              component={StartScreen}
               options={{ headerShown: false }}
             />
-            <Stack.Screen
-              name="Signup"
-              component={SignupScreen}
-              options={{ headerShown: false }}
-            />
-          </>
-        )}
+          )}
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Signup"
+            component={SignupScreen}
+            options={{ headerShown: false }}
+          />
+        </>
+        {/* )} */}
       </Stack.Navigator>
     </NavigationContainer>
   );
