@@ -1,13 +1,6 @@
 import LoggedInHeader from "../../components/common/LoggedInHeader";
 import React from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
 import {
   GuideHeader,
   QuickGuide,
@@ -15,6 +8,7 @@ import {
   FaqSection,
   ContactSection,
 } from "../../components/main/GuidItem";
+import { colors } from "../../styles/colors";
 
 const GuideScreen = () => {
   return (
@@ -34,7 +28,7 @@ const GuideScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: colors.background,
   },
 });
 

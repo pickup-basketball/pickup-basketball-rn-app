@@ -20,6 +20,7 @@ import {
   Star,
 } from "lucide-react-native";
 import LoggedInHeader from "../../components/common/LoggedInHeader";
+import { colors } from "../../styles/colors";
 
 // 타입 정의
 type Court = {
@@ -326,7 +327,7 @@ const CourtsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
