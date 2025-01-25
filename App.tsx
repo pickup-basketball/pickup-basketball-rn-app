@@ -8,7 +8,7 @@ import LoginScreen from "./src/screens/auth/LoginScreen";
 import SignupScreen, {
   RootStackParamList,
 } from "./src/screens/auth/SignupScreen";
-import MatchingScreen from "./src/screens/main/MatchingScreen";
+import { MatchingScreen } from "./src/screens/main/MatchingScreen";
 import CourtsScreen from "./src/screens/main/CourtsScreen";
 import GuideScreen from "./src/screens/main/GuideScreen";
 
