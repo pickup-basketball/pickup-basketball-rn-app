@@ -8,17 +8,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from "react-native";
-
-// SignupStep1.tsx
-export type TSignupStep1Props = {
-  onNext: (data: TStep1Data) => void;
-};
-
-export type TStep1Data = {
-  email: string;
-  password: string;
-  nickname: string;
-};
+import { TSignupStep1Props, TStep1Data } from "../../../types/signup";
 
 const SignupStep1 = ({ onNext }: TSignupStep1Props) => {
   const [formData, setFormData] = useState<TStep1Data>({

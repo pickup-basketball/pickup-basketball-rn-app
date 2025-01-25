@@ -9,41 +9,16 @@ import {
   Modal,
   FlatList,
 } from "react-native";
-import { TStep1Data } from "./SignupStep1";
+import {
+  TSignupStep2Props,
+  TNavigationProp,
+  TPosition,
+  TLevel,
+} from "../../../types/signup";
 import { useNavigation } from "@react-navigation/native";
-import type { StackNavigationProp } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-export type TSignupData = TStep1Data & {
-  height: string;
-  weight: string;
-  position: string;
-  level: string;
-};
-
-export type TSignupStep2Props = {
-  step1Data: TStep1Data;
-  onPrevious: () => void;
-  onSubmit: (allData: TSignupData) => void;
-};
-
-type TPosition = {
-  position: string;
-  value: string;
-};
-
-type TLevel = {
-  level: string;
-  value: string;
-};
-
-// 네비게이션에서 사용할 스크린들의 타입 정의
-type RootStackParamList = {
-  Matching: undefined;
-};
-
-// navigation 타입 정의
-type TNavigationProp = StackNavigationProp<RootStackParamList>;
+import { positions } from "../../../constants/positions";
+import { levels } from "../../../constants/levels";
 
 const SignupStep2 = ({
   step1Data,
@@ -70,20 +45,6 @@ const SignupStep2 = ({
 
     navigation.navigate("Matching");
   };
-
-  const positions: TPosition[] = [
-    { position: "Point Guard (PG)", value: "PG" },
-    { position: "Shooting Guard (SG)", value: "SG" },
-    { position: "Small Forward (SF)", value: "SF" },
-    { position: "Power Forward (PF)", value: "PF" },
-    { position: "Center (C)", value: "C" },
-  ];
-
-  const levels: TLevel[] = [
-    { level: "초급", value: "BEGINNER" },
-    { level: "중급", value: "INTERMEDIATE" },
-    { level: "상급", value: "ADVANCED" },
-  ];
 
   const handleSelectPosition = (position: TPosition) => {
     setFormData((prev) => ({
@@ -241,40 +202,6 @@ const SignupStep2 = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-  },
-  logo: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  headerButton: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  titleContainer: {
-    marginTop: -10,
-    marginBottom: 15,
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#666",
-  },
   inputContainer: {
     marginBottom: 20,
   },
@@ -289,14 +216,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
   },
-  nickNameInput: {
-    backgroundColor: "#3E3E3E",
-    borderWidth: 1,
-    borderColor: "#696969",
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
-  },
   signupButton: {
     flex: 1,
     backgroundColor: "#ff6b00",
@@ -310,9 +229,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 10,
   },
-  splitButton: {
-    flex: 1,
-  },
   previousButton: {
     backgroundColor: "#696969",
   },
@@ -320,57 +236,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "800",
-  },
-  loginLinkContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  loginText: {
-    color: "#666",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  loginLink: {
-    color: "#ff6b00",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  mainButton: {
-    padding: 8,
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 3,
-  },
-  mainButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    bottom: 1,
-  },
-  signupStageContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 15,
-    marginBottom: 10,
-  },
-  currentSignupStage: {
-    backgroundColor: "#F97316",
-    borderRadius: 10,
-    height: 5,
-    width: 20,
-    flex: 1,
-  },
-  signupStage: {
-    backgroundColor: "#8A410E",
-    borderRadius: 10,
-    height: 5,
-    width: 20,
-    flex: 1,
   },
   modalContainer: {
     flex: 1,

@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 import { useState } from "react";
-import SignupLink from "./SignupLink";
+import SignupLink from "../signup/SignupLink";
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
