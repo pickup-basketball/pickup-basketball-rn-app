@@ -1,7 +1,7 @@
 type Level = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
 type Status = "OPEN" | "CLOSED";
 
-type Match = {
+type Post = {
   id: number;
   title: string;
   courtName: string;
@@ -20,4 +20,4 @@ type TPosition = {
   value: string;
 };
 
-export { Level, Status, Match, TPosition };
+export { Level, Status, Post, TPosition };
