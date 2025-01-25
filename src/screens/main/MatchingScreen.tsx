@@ -1,70 +1,121 @@
-import React from "react";
+// screens/match/index.tsx
+import React, { useState, useEffect } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
   SafeAreaView,
   ScrollView,
+  View,
+  Text,
   TouchableOpacity,
-  Image,
+  StyleSheet,
 } from "react-native";
+import { Plus, MapPin, Clock, Users, Calendar } from "lucide-react-native";
+import { FilterSection } from "../../components/common/FilterSection";
+import {
+  GradientText,
+  GradientWithBox,
+} from "../../components/common/Gradient";
+import { Post, Level } from "../../types/match";
+import { colors } from "../../styles/colors";
+import { DUMMY_POSTS } from "../../constants/dummy-data";
+import LoggedInHeader from "../../components/common/LoggedInHeader";
 
-const MatchingScreen = () => {
-  // 매칭 데이터 예시
-  const matchings = [
-    {
-      id: 1,
-      time: "오후 3:00",
-      location: "강남구 농구장",
-      currentMembers: 3,
-      maxMembers: 4,
-      status: "모집중",
-    },
-    {
-      id: 2,
-      time: "오후 4:30",
-      location: "서초구 체육관",
-      currentMembers: 2,
-      maxMembers: 4,
-      status: "모집중",
-    },
-    // 더 많은 매칭 데이터...
-  ];
+export const MatchingScreen = () => {
+  const [matches, setMatches] = useState<Post[]>([...DUMMY_POSTS]);
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [levelFilter, setLevelFilter] = useState<Level | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const formatLevel = (level: Level) =>
+    ({
+      BEGINNER: "초급",
+      INTERMEDIATE: "중급",
+      ADVANCED: "상급",
+    }[level]);
+
+  const getLevelStyle = (level: Level) =>
+    ({
+      BEGINNER: colors.level.beginner,
+      INTERMEDIATE: colors.level.intermediate,
+      ADVANCED: colors.level.advanced,
+    }[level]);
+
+  const renderMatchItem = ({ item }: { item: Post }) => (
+    <TouchableOpacity style={styles.matchCard}>
+      <View style={styles.matchHeader}>
+        <Text style={styles.matchTitle}>{item.title}</Text>
+        <View style={styles.levelBadge}>
+          <Text
+            style={[styles.levelText, { color: getLevelStyle(item.level) }]}
+          >
+            {formatLevel(item.level)}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.matchInfo}>
+        <View style={styles.infoRow}>
+          <MapPin size={16} color={colors.primary} />
+          <Text style={styles.locationText}>{item.location}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Calendar size={16} color={colors.primary} />
+          <Text style={styles.infoText}>{item.date}</Text>
+          <Clock size={16} color={colors.primary} />
+          <Text style={styles.infoText}>{item.time}</Text>
+          <Users size={16} color={colors.primary} />
+          <Text style={styles.infoText}>
+            {item.currentPlayers}/{item.maxPlayers}명
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.matchFooter}>
+        <Text style={styles.costText}>
+          {item.cost === 0 ? "무료" : `${item.cost.toLocaleString()}원`}
+        </Text>
+        {item.status === "OPEN" ? (
+          <TouchableOpacity style={styles.joinButton}>
+            <GradientWithBox
+              text="참여하기"
+              style={{
+                width: "100%",
+                padding: 10,
+              }}
+            />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.closedButton}>
+            <Text style={styles.closedButtonText}>마감</Text>
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* 헤더 */}
+      <LoggedInHeader />
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>농구 메이트 찾기</Text>
-        <TouchableOpacity style={styles.createButton}>
-          <Text style={styles.createButtonText}>메이트 구하기</Text>
+        <GradientText
+          text="농구 메이트 찾기"
+          style={styles.headerTitle}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        />
+        <Text style={styles.headerDescription}>근처의 매칭을 찾아보세요.</Text>
+        <TouchableOpacity>
+          <GradientWithBox
+            icon={<Plus color={colors.white} size={20} />}
+            text="새로운 매칭 만들기"
+          />
         </TouchableOpacity>
       </View>
 
-      {/* 매칭 리스트 */}
-      <ScrollView style={styles.content}>
-        {matchings.map((match) => (
-          <View key={match.id} style={styles.matchCard}>
-            <View style={styles.matchHeader}>
-              <Text style={styles.matchTime}>{match.time}</Text>
-              <View style={styles.statusBadge}>
-                <Text style={styles.statusText}>{match.status}</Text>
-              </View>
-            </View>
+      <FilterSection />
 
-            <View style={styles.matchInfo}>
-              <Text style={styles.locationText}>{match.location}</Text>
-              <View style={styles.memberInfo}>
-                <Text style={styles.memberText}>
-                  {match.currentMembers}/{match.maxMembers}명
-                </Text>
-              </View>
-            </View>
-
-            <TouchableOpacity style={styles.joinButton}>
-              <Text style={styles.joinButtonText}>참여하기</Text>
-            </TouchableOpacity>
-          </View>
+      <ScrollView style={styles.listContainer}>
+        {matches.map((match) => (
+          <View key={match.id}>{renderMatchItem({ item: match })}</View>
         ))}
       </ScrollView>
     </SafeAreaView>
@@ -74,89 +125,85 @@ const MatchingScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: colors.background,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 36,
     fontWeight: "bold",
-    color: "#fff",
   },
-  createButton: {
-    backgroundColor: "#ff6b00",
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
+  headerDescription: {
+    color: colors.grey.medium,
+    fontSize: 16,
+    marginBottom: 15,
   },
-  createButtonText: {
-    color: "#fff",
-    fontSize: 14,
-  },
-  content: {
+  listContainer: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
   },
   matchCard: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 10,
+    backgroundColor: colors.grey.dark,
     padding: 15,
+    borderRadius: 12,
     marginBottom: 15,
+    borderWidth: 0.5,
+    borderColor: colors.grey.medium,
   },
   matchHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
   },
-  matchTime: {
-    color: "#fff",
+  matchTitle: {
+    color: colors.white,
     fontSize: 16,
     fontWeight: "bold",
   },
-  statusBadge: {
-    backgroundColor: "#ff6b00",
+  levelBadge: {
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 5,
+    borderRadius: 15,
   },
-  statusText: {
-    color: "#fff",
+  levelText: {
     fontSize: 12,
+    fontWeight: "bold",
   },
   matchInfo: {
-    marginBottom: 15,
+    marginVertical: 10,
   },
-  locationText: {
-    color: "#fff",
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  memberInfo: {
+  infoRow: {
     flexDirection: "row",
     alignItems: "center",
+    marginVertical: 5,
   },
-  memberText: {
-    color: "#999",
-    fontSize: 14,
+  locationText: {
+    color: colors.grey.medium,
+    marginLeft: 10,
   },
-  joinButton: {
-    backgroundColor: "#333",
-    padding: 12,
-    borderRadius: 8,
+  infoText: {
+    color: colors.white,
+    marginLeft: 10,
+    marginRight: 10,
+  },
+  matchFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
-  joinButtonText: {
-    color: "#fff",
-    fontSize: 14,
+  costText: {
+    color: colors.white,
+  },
+  joinButton: {},
+  closedButton: {
+    backgroundColor: colors.grey.dark,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  closedButtonText: {
+    color: colors.grey.medium,
     fontWeight: "bold",
   },
 });
-
-export default MatchingScreen;
