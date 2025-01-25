@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { UserPlus, MapPin, ChevronDown } from "lucide-react-native";
 import React from "react";
+import { colors } from "../../styles/colors";
 
 const GuideHeader = () => {
   return (
@@ -86,7 +87,7 @@ const GuideAccordion = ({
 };
 const DetailGuide = () => {
   return (
-    <View style={[styles.faqSection, styles.darkSection]}>
+    <View style={styles.detailSection}>
       <Text style={styles.sectionTitle}>상세 가이드</Text>
       <GuideAccordion
         title="프로필 설정하기"
@@ -197,10 +198,8 @@ export { GuideHeader, QuickGuide, DetailGuide, FaqSection, ContactSection };
 
 const styles = StyleSheet.create({
   headerSection: {
-    backgroundColor: "#18181B",
     padding: 20,
-    paddingTop: 80,
-    paddingBottom: 80,
+    paddingVertical: 80,
   },
   headerContent: {
     alignItems: "center",
@@ -219,23 +218,25 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   quickGuideSection: {
-    marginBottom: 50,
+    paddingVertical: 50,
+    backgroundColor: "black",
     padding: 20,
+  },
+  detailSection: {
+    padding: 20,
+    backgroundColor: colors.background,
+    paddingVertical: 50,
   },
   faqSection: {
     padding: 20,
     backgroundColor: "#000",
-    paddingBottom: 70,
-  },
-  darkSection: {
-    backgroundColor: "#18181B",
+    paddingVertical: 50,
   },
   sectionTitle: {
     fontSize: 30,
     fontWeight: "bold",
     color: "#FFF",
     textAlign: "center",
-    marginTop: 50,
     marginBottom: 20,
   },
   guideCards: {
@@ -300,9 +301,9 @@ const styles = StyleSheet.create({
     transform: [{ rotate: "180deg" }],
   },
   contactSection: {
+    paddingVertical: 50,
     backgroundColor: "#18181B",
     alignItems: "center",
-    paddingBottom: 50,
   },
   contactDescription: {
     color: "#9CA3AF",
