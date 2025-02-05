@@ -14,7 +14,10 @@ type Post = {
   cost: number;
   status: Status;
   description: string;
+  rules?: string;
+  hostId: number;
 };
+
 type TPosition = {
   position: string;
   value: string;

@@ -1,22 +1,23 @@
 import React, { useState } from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Modal } from "react-native";
+import { Level } from "../../types/match";
 
-type FilterPickerProps = {
-  selectedValue: string;
-  onValueChange: (value: string) => void;
-  items: { label: string; value: string }[];
+type FilterPickerProps<T> = {
+  selectedValue: T;
+  onValueChange: (value: T) => void;
+  items: Array<{ label: string; value: T }>;
   placeholder: string;
 };
 
-export const FilterPicker: React.FC<FilterPickerProps> = ({
+export const FilterPicker = <T,>({
   selectedValue,
   onValueChange,
   items,
   placeholder,
-}) => {
+}: FilterPickerProps<T>) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const handleSelect = (value: string) => {
+  const handleSelect = (value: T) => {
     onValueChange(value);
     setIsModalVisible(false);
   };
@@ -38,14 +39,14 @@ export const FilterPicker: React.FC<FilterPickerProps> = ({
           <View style={styles.modalContent}>
             <TouchableOpacity
               style={styles.modalOption}
-              onPress={() => handleSelect("all")}
+              onPress={() => handleSelect(selectedValue)}
             >
               <Text style={styles.modalOptionText}>{placeholder}</Text>
             </TouchableOpacity>
 
             {items.map((item) => (
               <TouchableOpacity
-                key={item.value}
+                key={item.value as string} // key로 문자열만 허용하므로 타입 캐스팅
                 style={styles.modalOption}
                 onPress={() => handleSelect(item.value)}
               >

@@ -14,6 +14,8 @@ const DUMMY_POSTS: Post[] = [
     cost: 5000,
     status: "OPEN",
     description: "주말 오후에 농구하실 분들 모집합니다. 중급 이상 실력자 환영!",
+    rules: "농구화 필수,음료 개별 지참,경기 30분 전 도착",
+    hostId: 1,
   },
   {
     id: 2,
@@ -28,6 +30,8 @@ const DUMMY_POSTS: Post[] = [
     cost: 0,
     status: "OPEN",
     description: "초보자도 환영합니다. 재미있게 즐기면서 해요!",
+    rules: "실내운동화 필수,타월 지참,음료수 제공",
+    hostId: 2,
   },
   {
     id: 3,
@@ -42,6 +46,8 @@ const DUMMY_POSTS: Post[] = [
     cost: 10000,
     status: "CLOSED",
     description: "상급자 위주로 진행되는 경기입니다.",
+    rules: "농구화 필수,수건 지참,15분 전 도착",
+    hostId: 3,
   },
   {
     id: 4,
@@ -56,6 +62,8 @@ const DUMMY_POSTS: Post[] = [
     cost: 8000,
     status: "OPEN",
     description: "아침 운동하실 분들 모집합니다!",
+    rules: "실내운동화 필수,샤워용품 지참,아침 6시 30분 집합",
+    hostId: 4,
   },
   {
     id: 5,
@@ -70,6 +78,8 @@ const DUMMY_POSTS: Post[] = [
     cost: 5000,
     status: "OPEN",
     description: "농구 배우고 싶으신 분들 환영합니다.",
+    rules: "실내운동화만 가능,물병 지참,초보자 친화적",
+    hostId: 5,
   },
 ];
 

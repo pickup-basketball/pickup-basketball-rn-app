@@ -18,29 +18,45 @@ import { Post, Level } from "../../types/match";
 import { colors } from "../../styles/colors";
 import { DUMMY_POSTS } from "../../constants/dummy-data";
 import LoggedInHeader from "../../components/common/LoggedInHeader";
+import { MatchDetailModal } from "../../components/match/MatchDetailModal";
+import { useNavigation } from "@react-navigation/native";
+import { WriteScreenNavigationProp } from "../../types/navigation";
+import { formatLevel, getLevelStyle } from "../../utils/formatters";
+import axiosInstance from "../../api/axios-interceptor";
 
 export const MatchingScreen = () => {
-  const [matches, setMatches] = useState<Post[]>([...DUMMY_POSTS]);
+  const navigation = useNavigation<WriteScreenNavigationProp>();
+  const [matches, setMatches] = useState<Post[]>([]);
+  const [selectedMatch, setSelectedMatch] = useState<Post | null>(null);
   const [locationFilter, setLocationFilter] = useState("all");
   const [levelFilter, setLevelFilter] = useState<Level | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const formatLevel = (level: Level) =>
-    ({
-      BEGINNER: "초급",
-      INTERMEDIATE: "중급",
-      ADVANCED: "상급",
-    }[level]);
+  const fetchMatches = async () => {
+    try {
+      const response = await axiosInstance.get("/matches");
+      if (response.data?.data && Array.isArray(response.data.data)) {
+        setMatches(response.data.data);
+      } else {
+        setMatches([]);
+      }
+    } catch (error) {
+      setMatches([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const getLevelStyle = (level: Level) =>
-    ({
-      BEGINNER: colors.level.beginner,
-      INTERMEDIATE: colors.level.intermediate,
-      ADVANCED: colors.level.advanced,
-    }[level]);
+  useEffect(() => {
+    fetchMatches();
+  }, []);
 
   const renderMatchItem = ({ item }: { item: Post }) => (
-    <TouchableOpacity style={styles.matchCard}>
+    <TouchableOpacity
+      style={styles.matchCard}
+      onPress={() => setSelectedMatch(item)}
+    >
       <View style={styles.matchHeader}>
         <Text style={styles.matchTitle}>{item.title}</Text>
         <View style={styles.levelBadge}>
@@ -78,8 +94,10 @@ export const MatchingScreen = () => {
             <GradientWithBox
               text="참여하기"
               style={{
+                alignSelf: "flex-end",
                 width: "100%",
-                padding: 10,
+                paddingHorizontal: 30,
+                paddingVertical: 10,
               }}
             />
           </TouchableOpacity>
@@ -103,21 +121,57 @@ export const MatchingScreen = () => {
           end={{ x: 1, y: 0 }}
         />
         <Text style={styles.headerDescription}>근처의 매칭을 찾아보세요.</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("WriteMatch")}>
           <GradientWithBox
-            icon={<Plus color={colors.white} size={20} />}
+            icon={
+              <Plus color={colors.white} size={20} style={{ marginRight: 5 }} />
+            }
             text="새로운 매칭 만들기"
+            style={{ justifyContent: "center" }}
           />
         </TouchableOpacity>
       </View>
 
-      <FilterSection />
+      <FilterSection
+        locationFilter={locationFilter}
+        levelFilter={levelFilter}
+        setLocationFilter={setLocationFilter}
+        setLevelFilter={setLevelFilter}
+      />
 
-      <ScrollView style={styles.listContainer}>
-        {matches.map((match) => (
+      {/* <ScrollView style={styles.listContainer}>
+        {matches?.map((match) => (
           <View key={match.id}>{renderMatchItem({ item: match })}</View>
         ))}
+        {loading && (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>로딩 중...</Text>
+          </View>
+        )}
+      </ScrollView> */}
+      <ScrollView style={styles.listContainer}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>로딩 중...</Text>
+          </View>
+        ) : Array.isArray(matches) && matches.length > 0 ? (
+          matches.map((match) => (
+            <View key={match.id}>{renderMatchItem({ item: match })}</View>
+          ))
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>매치가 없습니다.</Text>
+          </View>
+        )}
       </ScrollView>
+
+      {selectedMatch ? (
+        <MatchDetailModal
+          match={selectedMatch}
+          isOpen={true}
+          onClose={() => setSelectedMatch(null)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 };
@@ -137,6 +191,7 @@ const styles = StyleSheet.create({
   headerDescription: {
     color: colors.grey.medium,
     fontSize: 16,
+    marginTop: 5,
     marginBottom: 15,
   },
   listContainer: {
@@ -195,7 +250,9 @@ const styles = StyleSheet.create({
   costText: {
     color: colors.white,
   },
-  joinButton: {},
+  joinButton: {
+    justifyContent: "flex-end",
+  },
   closedButton: {
     backgroundColor: colors.grey.dark,
     paddingHorizontal: 20,
@@ -205,5 +262,25 @@ const styles = StyleSheet.create({
   closedButtonText: {
     color: colors.grey.medium,
     fontWeight: "bold",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  loadingText: {
+    color: colors.white,
+    fontSize: 16,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyText: {
+    color: colors.grey.medium,
+    fontSize: 16,
   },
 });

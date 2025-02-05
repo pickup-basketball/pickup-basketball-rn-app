@@ -5,7 +5,7 @@ import { ViewStyle, TextStyle } from "react-native";
 
 type TGradientWithBoxProps = {
   icon?: React.ReactNode;
-  text: string;
+  text?: string;
   style?: ViewStyle;
   textStyle?: TextStyle;
   start?: { x: number; y: number };
@@ -29,8 +29,6 @@ const GradientWithBox = ({
         borderRadius: 8,
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
       },
       style,
     ]}

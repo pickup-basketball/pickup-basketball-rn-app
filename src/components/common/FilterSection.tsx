@@ -1,34 +1,53 @@
 import { View, StyleSheet } from "react-native";
 import { useState } from "react";
 import { FilterPicker } from "./FilterPicker";
+import { Level } from "../../types/match";
 
-export const FilterSection = () => {
-  const [locationFilter, setLocationFilter] = useState("all");
-  const [levelFilter, setLevelFilter] = useState("all");
+type TFilterSectionProps = {
+  locationFilter: string;
+  levelFilter: Level | "all";
+  setLocationFilter: (value: string) => void;
+  setLevelFilter: (value: Level | "all") => void;
+};
 
-  const locations = [
+export const FilterSection = ({
+  locationFilter,
+  levelFilter,
+  setLocationFilter,
+  setLevelFilter,
+}: TFilterSectionProps) => {
+  const locations: { label: string; value: string }[] = [
     { label: "강남구", value: "gangnam" },
     { label: "송파구", value: "songpa" },
     { label: "마포구", value: "mapo" },
   ];
 
-  const levels = [
+  const levels: { label: string; value: Level | "all" }[] = [
     { label: "초급", value: "BEGINNER" },
     { label: "중급", value: "INTERMEDIATE" },
     { label: "상급", value: "ADVANCED" },
   ];
 
+  const handleLocationChange = (value: string) => {
+    setLocationFilter(value);
+  };
+
+  const handleLevelChange = (value: Level | "all") => {
+    setLevelFilter(value);
+  };
+
   return (
     <View style={styles.filterSection}>
-      <FilterPicker
+      <FilterPicker<string>
         selectedValue={locationFilter}
-        onValueChange={setLocationFilter}
+        onValueChange={handleLocationChange}
         items={locations}
         placeholder="전체 지역"
       />
-      <FilterPicker
+
+      <FilterPicker<Level | "all">
         selectedValue={levelFilter}
-        onValueChange={setLevelFilter}
+        onValueChange={handleLevelChange}
         items={levels}
         placeholder="전체 레벨"
       />

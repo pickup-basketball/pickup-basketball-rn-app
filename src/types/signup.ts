@@ -1,51 +1,36 @@
+// signup.ts
 import type { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "./navigation";
 
-type TSignupStep1Props = {
-  onNext: (data: TStep1Data) => void;
+export type TSignupStep1Props = {
+  onNext: (data: TStep1Form) => void;
 };
 
-type TStep1Data = {
+export type TStep1Form = {
   email: string;
   password: string;
   nickname: string;
 };
 
-type TSignupData = TStep1Data & {
+export type TStep2Form = {
   height: string;
   weight: string;
-  position: string;
+  position: TPosition;
   level: string;
 };
 
-type TSignupStep2Props = {
-  step1Data: TStep1Data;
+export type TSignupForm = TStep1Form & TStep2Form;
+
+export type TSignupStep2Props = {
+  step1Data: TStep1Form;
   onPrevious: () => void;
-  onSubmit: (allData: TSignupData) => void;
+  onSubmit: (allData: TSignupForm) => void;
 };
 
-type TPosition = {
-  position: string;
-  value: string;
-};
+export const positions = ["PG", "SG", "SF", "PF", "C"] as const;
+export type TPosition = (typeof positions)[number];
 
-type TLevel = {
-  level: string;
-  value: string;
-};
+export const levels = ["BEGINNER", "INTERMEDIATE", "ADVANCED"] as const;
+export type TLevel = (typeof levels)[number];
 
-type RootStackParamList = {
-  Matching: undefined;
-};
-
-type TNavigationProp = StackNavigationProp<RootStackParamList>;
-
-export {
-  TSignupStep1Props,
-  TSignupData,
-  TStep1Data,
-  TSignupStep2Props,
-  TPosition,
-  TLevel,
-  RootStackParamList,
-  TNavigationProp,
-};
+export type TNavigationProp = StackNavigationProp<RootStackParamList>;
