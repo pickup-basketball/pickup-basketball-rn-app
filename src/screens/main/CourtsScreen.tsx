@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -21,8 +21,8 @@ import {
 } from "lucide-react-native";
 import LoggedInHeader from "../../components/common/LoggedInHeader";
 import { colors } from "../../styles/colors";
+import axiosInstance from "../../api/axios-interceptor";
 
-// 타입 정의
 type Court = {
   id: number;
   name: string;
@@ -39,116 +39,41 @@ type Court = {
   restrictions: string;
 };
 
-// 더미 데이터
-const DUMMY_COURTS: Court[] = [
-  {
-    id: 1,
-    name: "올림픽공원 농구장",
-    address: "서울특별시 송파구 올림픽로 424",
-    location: "송파구",
-    description:
-      "올림픽공원 내에 위치한 야외 농구장입니다. 총 4개의 코트가 있으며, 바닥 상태가 매우 좋습니다.",
-    images: ["/images/courts/olympic-park.jpg"],
-    hoops: 8,
-    rating: 4.5,
-    bestTime: "저녁",
-    parking: true,
-    facilities: ["화장실", "조명", "음수대"],
-    openingHours: "06:00 - 22:00",
-    restrictions: "공원 내 취사 금지",
-  },
-  {
-    id: 2,
-    name: "한강공원 농구장",
-    address: "서울특별시 영등포구 여의동로 330",
-    location: "영등포구",
-    description:
-      "한강변에 위치한 농구장으로, 시원한 강바람을 맞으며 운동할 수 있습니다.",
-    images: ["/images/courts/hangang-park.jpg"],
-    hoops: 4,
-    rating: 4.0,
-    bestTime: "아침",
-    parking: true,
-    facilities: ["화장실", "편의점", "자판기"],
-    openingHours: "24시간",
-    restrictions: "우천시 이용 제한",
-  },
-  {
-    id: 3,
-    name: "강남구민체육센터 농구장",
-    address: "서울특별시 강남구 삼성로 168",
-    location: "강남구",
-    description: "실내 농구장으로, 날씨와 관계없이 이용 가능합니다.",
-    images: ["/images/courts/gangnam-center.jpg"],
-    hoops: 6,
-    rating: 5.0,
-    bestTime: "주말",
-    parking: true,
-    facilities: ["샤워실", "락커룸", "매점"],
-    openingHours: "06:00 - 22:00",
-    restrictions: "회원제 운영",
-  },
-  {
-    id: 4,
-    name: "마포구민체육센터",
-    address: "서울특별시 마포구 백범로 235",
-    location: "마포구",
-    description: "깨끗하고 관리가 잘 되어있는 실내 농구장입니다.",
-    images: ["/images/courts/mapo-center.jpg"],
-    hoops: 4,
-    rating: 4.0,
-    bestTime: "오후",
-    parking: true,
-    facilities: ["화장실", "샤워실", "음수대"],
-    openingHours: "09:00 - 21:00",
-    restrictions: "실내화 필수",
-  },
-  {
-    id: 5,
-    name: "노원마을 농구장",
-    address: "서울특별시 노원구 동일로 1286",
-    location: "노원구",
-    description: "동네 주민들이 자주 이용하는 아늑한 농구장입니다.",
-    images: ["/images/courts/nowon-court.jpg"],
-    hoops: 2,
-    rating: 3.5,
-    bestTime: "저녁",
-    parking: false,
-    facilities: ["벤치", "조명"],
-    openingHours: "24시간",
-    restrictions: "없음",
-  },
-  {
-    id: 6,
-    name: "서초실내체육관",
-    address: "서울특별시 서초구 반포대로 58",
-    location: "서초구",
-    description: "전문적인 시설을 갖춘 실내 농구장입니다.",
-    images: ["/images/courts/seocho-gym.jpg"],
-    hoops: 6,
-    rating: 4.5,
-    bestTime: "오전",
-    parking: true,
-    facilities: ["샤워실", "락커룸", "체력단련실"],
-    openingHours: "06:00 - 22:00",
-    restrictions: "회원 우선",
-  },
-];
-
 const CourtsScreen = () => {
+  const [courts, setCourts] = useState<Court[]>([]);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"card" | "map">("card");
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [locationFilter, setLocationFilter] = useState("전체");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const locations = useMemo(() => {
-    return ["전체", ...new Set(DUMMY_COURTS.map((court) => court.location))];
+  // fetchCourts 함수를 수정해서 응답 데이터를 확인해보세요
+  const fetchCourts = async () => {
+    try {
+      const response = await axiosInstance.get("/courts");
+      console.log("서버 응답:", response.data); // 실제 데이터 구조 확인
+      if (response.data?.data && Array.isArray(response.data.data)) {
+        setCourts(response.data.data);
+      }
+    } catch (error) {
+      console.error("코트 데이터 조회 실패:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourts();
   }, []);
 
+  const locations = useMemo(() => {
+    return ["전체", ...new Set(courts.map((court) => court.location))];
+  }, [courts]);
+
   const filteredCourts = useMemo(() => {
-    if (locationFilter === "전체") return DUMMY_COURTS;
-    return DUMMY_COURTS.filter((court) => court.location === locationFilter);
-  }, [locationFilter]);
+    if (locationFilter === "전체") return courts;
+    return courts.filter((court) => court.location === locationFilter);
+  }, [locationFilter, courts]);
 
   const renderStars = (rating: number) => {
     return (
@@ -224,6 +149,15 @@ const CourtsScreen = () => {
     </TouchableOpacity>
   );
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>코트 정보를 불러오는 중...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
   return (
     <SafeAreaView style={styles.container}>
       <LoggedInHeader />
@@ -521,6 +455,15 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    color: colors.white,
+    fontSize: 16,
   },
 });
 
