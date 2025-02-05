@@ -14,42 +14,48 @@ import {
   TNavigationProp,
   TPosition,
   TLevel,
+  positions,
+  levels,
 } from "../../../types/signup";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { positions } from "../../../constants/positions";
-import { levels } from "../../../constants/levels";
+import { validateSignupStep2 } from "../../../utils/validators/signupValidator";
 
-const SignupStep2 = ({
+const SignupStep2: React.FC<TSignupStep2Props> = ({
   step1Data,
   onPrevious,
   onSubmit,
-}: TSignupStep2Props) => {
+}) => {
   const [formData, setFormData] = useState({
     height: "",
     weight: "",
-    position: "",
-    level: "",
+    position: "" as TPosition,
+    level: "" as TLevel,
   });
+  const [errors, setErrors] = useState<string[]>([]);
   const [showPositionModal, setShowPositionModal] = useState(false);
   const [showLevelModal, setShowLevelModal] = useState(false);
   const navigation = useNavigation<TNavigationProp>();
 
   const handleSubmit = async () => {
-    await onSubmit({
-      ...step1Data,
-      ...formData,
-    });
+    const validationErrors = validateSignupStep2({ ...step1Data, ...formData });
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
 
-    await AsyncStorage.setItem("isLoggedIn", "true");
-
-    navigation.navigate("Matching");
+    try {
+      await onSubmit({ ...step1Data, ...formData });
+      await AsyncStorage.setItem("isLoggedIn", "true");
+    } catch (error) {
+      console.error("회원가입 실패:", error);
+    }
   };
 
   const handleSelectPosition = (position: TPosition) => {
     setFormData((prev) => ({
       ...prev,
-      position: position.value,
+      position: position,
     }));
     setShowPositionModal(false);
   };
@@ -57,7 +63,7 @@ const SignupStep2 = ({
   const handleSelectLevel = (level: TLevel) => {
     setFormData((prev) => ({
       ...prev,
-      level: level.value,
+      level: level,
     }));
     setShowLevelModal(false);
   };
@@ -67,7 +73,7 @@ const SignupStep2 = ({
       style={styles.modalItem}
       onPress={() => handleSelectPosition(item)}
     >
-      <Text style={styles.modalItemText}>{item.position}</Text>
+      <Text style={styles.modalItemText}>{item}</Text>
     </TouchableOpacity>
   );
 
@@ -76,7 +82,7 @@ const SignupStep2 = ({
       style={styles.modalItem}
       onPress={() => handleSelectLevel(item)}
     >
-      <Text style={styles.modalItemText}>{item.level}</Text>
+      <Text style={styles.modalItemText}>{item}</Text>
     </TouchableOpacity>
   );
 
@@ -99,6 +105,7 @@ const SignupStep2 = ({
           style={styles.input}
           placeholder="kg"
           placeholderTextColor="#666"
+          value={formData.weight}
           keyboardType="numeric"
           onChangeText={(text) =>
             setFormData((prev) => ({ ...prev, weight: text }))
@@ -115,7 +122,7 @@ const SignupStep2 = ({
             }
           >
             {formData.position
-              ? positions.find((p) => p.value === formData.position)?.position
+              ? positions.find((p) => p === formData.position)
               : "포지션을 선택해주세요"}
           </Text>
         </TouchableOpacity>
@@ -130,7 +137,7 @@ const SignupStep2 = ({
             }
           >
             {formData.level
-              ? levels.find((l) => l.value === formData.level)?.level
+              ? levels.find((l) => l === formData.level)
               : "실력 수준을 선택해주세요"}
           </Text>
         </TouchableOpacity>
@@ -148,7 +155,7 @@ const SignupStep2 = ({
             <FlatList
               data={positions}
               renderItem={renderPositionItem}
-              keyExtractor={(item) => item.value}
+              keyExtractor={(item) => item}
             />
             <TouchableOpacity
               style={styles.modalCloseButton}
@@ -168,7 +175,7 @@ const SignupStep2 = ({
             <FlatList
               data={levels}
               renderItem={renderLevelItem}
-              keyExtractor={(item) => item.value}
+              keyExtractor={(item) => item}
             />
             <TouchableOpacity
               style={styles.modalCloseButton}
@@ -187,13 +194,7 @@ const SignupStep2 = ({
         >
           <Text style={styles.signupButtonText}>이전</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.signupButton]}
-          onPress={() => {
-            handleSubmit();
-            navigation.navigate("Matching");
-          }}
-        >
+        <TouchableOpacity style={[styles.signupButton]} onPress={handleSubmit}>
           <Text style={styles.signupButtonText}>가입하기</Text>
         </TouchableOpacity>
       </View>
