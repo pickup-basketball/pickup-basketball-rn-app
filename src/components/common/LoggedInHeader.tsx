@@ -4,7 +4,6 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../screens/auth/SignupScreen";
 import { User } from "lucide-react-native";
-import { colors } from "../../styles/colors";
 
 type TNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -25,7 +24,7 @@ const LoggedInHeader = () => {
           </TouchableOpacity>
         </View>
         <View style={styles.userButton}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("MyPage")}>
             <User color="white" size={22} />
           </TouchableOpacity>
         </View>
