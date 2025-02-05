@@ -5,12 +5,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import StartScreen from "./src/screens/auth/StartScreen";
 import LoginScreen from "./src/screens/auth/LoginScreen";
-import SignupScreen, {
-  RootStackParamList,
-} from "./src/screens/auth/SignupScreen";
-import { MatchingScreen } from "./src/screens/main/MatchingScreen";
-import CourtsScreen from "./src/screens/main/CourtsScreen";
-import GuideScreen from "./src/screens/main/GuideScreen";
+import SignupScreen from "./src/screens/auth/SignupScreen";
+import { MainTabNavigator } from "./src/navigation/MainTabNavigator";
+import { RootStackParamList } from "./src/types/navigation";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -20,75 +17,50 @@ export default function App() {
   const [hasSeenIntro, setHasSeenIntro] = useState(false);
 
   useEffect(() => {
-    // 앱 시작시 로그인 상태 체크
-    checkLoginState();
+    const checkLoginStatus = async () => {
+      const status = await AsyncStorage.getItem("isLoggedIn");
+      console.log("current isLoggedIn value", status);
+      setIsLoggedIn(status === "true");
+      setIsLoading(false);
+    };
+
+    checkLoginStatus();
   }, []);
 
-  const checkLoginState = async () => {
-    try {
-      const [loginState, introState] = await Promise.all([
-        AsyncStorage.getItem("isLoggedIn"),
-        AsyncStorage.getItem("hasSeenIntro"),
-      ]);
-
-      setIsLoggedIn(loginState === "true");
-      setHasSeenIntro(introState === "true");
-      setIsLoading(false);
-    } catch (error) {
-      console.error(error);
-      setIsLoading(false);
-    }
-  };
-
   if (isLoading) {
-    // 로딩 화면 표시
     return null;
   }
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {/* {isLoggedIn ? (
-          // 로그인된 상태 */}
-        <>
+        {isLoggedIn ? (
           <Stack.Screen
-            name="Guide"
-            component={GuideScreen}
+            name="MainTab"
+            component={MainTabNavigator}
             options={{ headerShown: false }}
           />
-          <Stack.Screen
-            name="Matching"
-            component={MatchingScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Courts"
-            component={CourtsScreen}
-            options={{ headerShown: false }}
-          />
-        </>
-        {/* ) : (
-          // 비로그인 상태 */}
-        <>
-          {!hasSeenIntro && (
+        ) : (
+          <>
+            {!hasSeenIntro && (
+              <Stack.Screen
+                name="Start"
+                component={StartScreen}
+                options={{ headerShown: false }}
+              />
+            )}
             <Stack.Screen
-              name="Start"
-              component={StartScreen}
+              name="Login"
+              component={LoginScreen}
               options={{ headerShown: false }}
             />
-          )}
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Signup"
-            component={SignupScreen}
-            options={{ headerShown: false }}
-          />
-        </>
-        {/* )} */}
+            <Stack.Screen
+              name="Signup"
+              component={SignupScreen}
+              options={{ headerShown: false }}
+            />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );
