@@ -1,4 +1,5 @@
 import { Level } from "../types/match";
+import { colors } from "../styles/colors";
 
 export const formatLevel = (level: Level) =>
   ({
@@ -7,10 +8,16 @@ export const formatLevel = (level: Level) =>
     ADVANCED: "상급",
   }[level]);
 
-export const getLevelStyle = (level: Level) => ({
-  color: {
-    BEGINNER: "#4ADE80",
-    INTERMEDIATE: "#EAB308",
-    ADVANCED: "#EF4444",
-  }[level],
-});
+export const getLevelStyle = (level: Level) =>
+  ({
+    BEGINNER: colors.level.beginner,
+    INTERMEDIATE: colors.level.intermediate,
+    ADVANCED: colors.level.advanced,
+  }[level]);
+
+export const getLevelColor = (level: string) =>
+  ({
+    BEGINNER: colors.level.beginner,
+    INTERMEDIATE: colors.level.intermediate,
+    ADVANCED: colors.level.advanced,
+  }[level] || colors.grey.medium);
