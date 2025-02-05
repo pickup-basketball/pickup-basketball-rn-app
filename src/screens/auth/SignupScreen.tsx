@@ -3,7 +3,7 @@ import { SafeAreaView, StyleSheet, View } from "react-native";
 import SignupStep1 from "../../components/auth/signup/SignupStep1";
 import SignupStep2 from "../../components/auth/signup/SignupStep2";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TSignupData } from "../../types/signup";
+import { TSignupForm } from "../../types/signup";
 import Header from "../../components/common/Header";
 import SignupTitle from "../../components/auth/signup/SignupTitle";
 import LoginLink from "../../components/auth/login/LoginLink";
@@ -16,6 +16,7 @@ export type RootStackParamList = {
   Guide: undefined;
   Matching: undefined;
   Courts: undefined;
+  MyPage: undefined;
 };
 
 // 회원가입 1단계에서 입력 정보 타입
@@ -33,11 +34,11 @@ const SignupScreen = () => {
     setSignupData(data);
     setStep(2);
   };
-  const handleSignup = async (data: TSignupData) => {
+  const handleSignup = async (data: TSignupForm) => {
     return { success: true };
   };
 
-  const handleSignupComplete = async (data: TSignupData) => {
+  const handleSignupComplete = async (data: TSignupForm) => {
     try {
       const result = await handleSignup(data);
 
