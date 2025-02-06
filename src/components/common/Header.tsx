@@ -2,10 +2,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ArrowLeft } from "lucide-react-native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../../screens/auth/SignupScreen";
-
-type TNavigationProp = StackNavigationProp<RootStackParamList>;
+import { TNavigationProp } from "../../types/navigation";
 
 const Header = () => {
   const navigation = useNavigation<TNavigationProp>();
