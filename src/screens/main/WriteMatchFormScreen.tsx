@@ -6,7 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Platform,
+  Alert,
 } from "react-native";
 import { ArrowLeft, X } from "lucide-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -16,32 +16,15 @@ import { WriteScreenNavigationProp } from "../../types/navigation";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../../styles/colors";
 import { GradientWithBox } from "../../components/common/Gradient";
+import { validateForm } from "../../utils/validators/matchValidator";
+import { TFormData } from "../../utils/validators/types";
 
 type Props = {
   navigation: WriteScreenNavigationProp;
 };
 
-interface FormData {
-  title: string;
-  description: string;
-  courtName: string;
-  location: string;
-  date: string;
-  time: string;
-  level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
-  maxPlayers: number;
-  cost: number;
-  rules: string[];
-}
-
-const LEVEL_DISPLAY = {
-  BEGINNER: "초급",
-  INTERMEDIATE: "중급",
-  ADVANCED: "상급",
-} as const;
-
 const WriteMatchForm = ({ navigation }: Props) => {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<TFormData>({
     title: "",
     description: "",
     courtName: "",
@@ -54,6 +37,7 @@ const WriteMatchForm = ({ navigation }: Props) => {
     rules: [""],
   });
 
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -88,15 +72,30 @@ const WriteMatchForm = ({ navigation }: Props) => {
 
   const handleSubmit = async () => {
     try {
+      // 폼 유효성 검사
+      const { isValid, errors: validationErrors } = validateForm(formData);
+
+      if (!isValid) {
+        setErrors(validationErrors);
+        // 첫 번째 에러 위치로 스크롤
+        const firstError = Object.keys(validationErrors)[0];
+        // 스크롤 로직은 별도로 구현 필요
+        return;
+      }
+
+      // 로딩 상태 설정
+      setIsLoading(true);
+
+      // 규칙 문자열로 변환
       const rulesString = formData.rules
         .filter((rule) => rule.trim() !== "")
         .join(",");
 
       const payload = {
-        title: formData.title,
-        description: formData.description,
-        courtName: formData.courtName,
-        location: formData.location,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        courtName: formData.courtName.trim(),
+        location: formData.location.trim(),
         date: formData.date,
         time: formData.time,
         level: formData.level,
@@ -106,11 +105,41 @@ const WriteMatchForm = ({ navigation }: Props) => {
         rules: rulesString,
       };
 
-      await axiosInstance.post("/matches", payload);
-      navigation.navigate("MatchingMain");
+      // API 요청
+      const response = await axiosInstance.post("/matches", payload);
+
+      if (response.status === 201 || response.status === 200) {
+        // 성공 알림 표시
+        Alert.alert("성공", "매치가 성공적으로 생성되었습니다", [
+          { text: "확인", onPress: () => navigation.navigate("MatchingMain") },
+        ]);
+      }
     } catch (error) {
       console.error("Error creating match:", error);
-      setErrors({ submit: "매치 생성 중 오류가 발생했습니다." });
+
+      // error 타입 가드
+      interface ApiError {
+        response?: {
+          data?: {
+            message?: string;
+          };
+        };
+      }
+
+      // 에러 메시지 처리
+      let errorMessage = "매치 생성 중 오류가 발생했습니다";
+
+      if (error && typeof error === "object" && "response" in error) {
+        const apiError = error as ApiError;
+        if (apiError.response?.data?.message) {
+          errorMessage = apiError.response.data.message;
+        }
+      }
+
+      setErrors({ submit: errorMessage });
+      Alert.alert("오류", errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
