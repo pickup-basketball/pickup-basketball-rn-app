@@ -1,3 +1,5 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axiosInstance from "../../../api/axios-interceptor";
 import {
   View,
   TextInput,
@@ -8,10 +10,57 @@ import {
 import { Eye, EyeOff } from "lucide-react-native";
 import { useState } from "react";
 import SignupLink from "../signup/SignupLink";
+import { AxiosError } from "axios";
+import { useNavigation } from "@react-navigation/native";
+import { TNavigationProp } from "../../../types/navigation";
+import { StackActions } from "@react-navigation/native";
 
 const LoginForm = () => {
+  const navigation = useNavigation<TNavigationProp>();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberLogin, setRememberLogin] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      const response = await axiosInstance.post("/auth/login", {
+        email,
+        password,
+      });
+
+      if (response.data?.data?.accessToken) {
+        await AsyncStorage.multiSet([
+          ["accessToken", response.data.data.accessToken],
+          ["refreshToken", response.data.data.refreshToken],
+          ["isLoggedIn", "true"],
+          ["rememberLogin", rememberLogin ? "true" : "false"],
+        ]);
+        const [loginStatus] = await AsyncStorage.multiGet(["isLoggedIn"]);
+        console.log("Updated isLoggedIn status:", loginStatus);
+        // 상태가 제대로 업데이트된 후에 네비게이션
+        if (loginStatus[1] === "true") {
+          navigation.dispatch(
+            StackActions.replace("MainTab", { screen: "Guide" })
+          );
+        }
+      } else {
+        console.error("No token in response:", response.data);
+        setError("로그인 응답에 토큰이 없습니다");
+      }
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        console.log("Error details:", {
+          response: error.response?.data,
+          status: error.response?.status,
+          headers: error.response?.headers,
+        });
+      }
+
+      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+    }
+  };
 
   return (
     <View style={styles.form}>
@@ -29,6 +78,8 @@ const LoginForm = () => {
           style={styles.input}
           placeholder="example@naver.com"
           placeholderTextColor="#666"
+          value={email}
+          onChangeText={setEmail}
         />
       </View>
 
@@ -41,6 +92,8 @@ const LoginForm = () => {
             placeholder="비밀번호를 입력하세요"
             placeholderTextColor="#666"
             secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
           />
           <TouchableOpacity
             onPress={() => setShowPassword(!showPassword)}
@@ -54,6 +107,8 @@ const LoginForm = () => {
           </TouchableOpacity>
         </View>
       </View>
+      {/* 에러 메시지 표시 */}
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
       {/* 로그인 상태 유지 & 비밀번호 찾기 */}
       <View style={styles.optionsContainer}>
@@ -72,7 +127,7 @@ const LoginForm = () => {
       </View>
 
       {/* 로그인 버튼 */}
-      <TouchableOpacity style={styles.loginButton}>
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.loginButtonText}>로그인</Text>
       </TouchableOpacity>
 
@@ -219,6 +274,12 @@ const styles = StyleSheet.create({
     color: "#000",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  errorText: {
+    color: "#ff4444",
+    fontSize: 14,
+    marginTop: -10,
+    marginBottom: 10,
   },
 });
 
