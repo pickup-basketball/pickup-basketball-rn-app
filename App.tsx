@@ -14,17 +14,53 @@ const Stack = createStackNavigator<RootStackParamList>();
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [hasSeenIntro, setHasSeenIntro] = useState(false);
+
+  // asyncStorage 비울 때
+  // useEffect(() => {
+  //   const clearStorage = async () => {
+  //     await AsyncStorage.clear();
+  //     console.log("Storage cleared");
+  //   };
+  //   clearStorage();
+  // }, []);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      const status = await AsyncStorage.getItem("isLoggedIn");
-      console.log("current isLoggedIn value", status);
-      setIsLoggedIn(status === "true");
+      const [loginStatus, rememberLogin] = await AsyncStorage.multiGet([
+        "isLoggedIn",
+        "rememberLogin",
+      ]);
+
+      if (rememberLogin[1] !== "true") {
+        await AsyncStorage.setItem("isLoggedIn", "false");
+        setIsLoggedIn(false);
+      } else {
+        setIsLoggedIn(loginStatus[1] === "true");
+      }
+
       setIsLoading(false);
     };
 
     checkLoginStatus();
+
+    // AsyncStorage 변경 감지를 위한 interval 설정
+    const interval = setInterval(checkLoginStatus, 1000);
+
+    return () => clearInterval(interval);
+  });
+
+  useEffect(() => {
+    const getAllKeys = async () => {
+      try {
+        const keys = await AsyncStorage.getAllKeys();
+        const items = await AsyncStorage.multiGet(keys);
+        console.log("All AsyncStorage Items:", items);
+      } catch (error) {
+        console.error("Error getting all AsyncStorage items:", error);
+      }
+    };
+
+    getAllKeys();
   }, []);
 
   if (isLoading) {
@@ -42,13 +78,11 @@ export default function App() {
           />
         ) : (
           <>
-            {!hasSeenIntro && (
-              <Stack.Screen
-                name="Start"
-                component={StartScreen}
-                options={{ headerShown: false }}
-              />
-            )}
+            <Stack.Screen
+              name="Start"
+              component={StartScreen}
+              options={{ headerShown: false }}
+            />
             <Stack.Screen
               name="Login"
               component={LoginScreen}
