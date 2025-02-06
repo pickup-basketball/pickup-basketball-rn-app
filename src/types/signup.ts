@@ -1,7 +1,4 @@
 // signup.ts
-import type { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "./navigation";
-
 export type TSignupStep1Props = {
   onNext: (data: TStep1Form) => void;
 };
@@ -32,5 +29,3 @@ export type TPosition = (typeof positions)[number];
 
 export const levels = ["BEGINNER", "INTERMEDIATE", "ADVANCED"] as const;
 export type TLevel = (typeof levels)[number];
-
-export type TNavigationProp = StackNavigationProp<RootStackParamList>;

@@ -28,7 +28,6 @@ type Court = {
   name: string;
   address: string;
   location: string;
-  description: string;
   images: string[];
   hoops: number;
   rating: number;
@@ -37,6 +36,10 @@ type Court = {
   facilities: string[];
   openingHours: string;
   restrictions: string;
+  latitude: number;
+  lighting: boolean;
+  longitude: number;
+  surface: string;
 };
 
 const CourtsScreen = () => {
@@ -96,11 +99,7 @@ const CourtsScreen = () => {
       onPress={() => setSelectedCourt(court)}
     >
       <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: court.images[0] }}
-          style={styles.courtImage}
-          // defaultSource={require("../assets/default-court.jpg")}
-        />
+        <Image source={{ uri: court.images?.[0] }} style={styles.courtImage} />
         <View style={styles.hoopsBadge}>
           <Text style={styles.hoopsText}>{court.hoops}개 링</Text>
         </View>
@@ -132,7 +131,7 @@ const CourtsScreen = () => {
         </View>
 
         <View style={styles.facilitiesContainer}>
-          {court.facilities.map((facility, index) => (
+          {court.facilities?.map((facility, index) => (
             <View key={index} style={styles.facilityBadge}>
               <Text style={styles.facilityText}>{facility}</Text>
             </View>

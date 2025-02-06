@@ -1,13 +1,13 @@
 import { View, StyleSheet } from "react-native";
-import { useState } from "react";
 import { FilterPicker } from "./FilterPicker";
-import { Level } from "../../types/match";
+import { Level, Post } from "../../types/match";
 
 type TFilterSectionProps = {
   locationFilter: string;
   levelFilter: Level | "all";
   setLocationFilter: (value: string) => void;
   setLevelFilter: (value: Level | "all") => void;
+  matches: Post[];
 };
 
 export const FilterSection = ({
@@ -15,41 +15,48 @@ export const FilterSection = ({
   levelFilter,
   setLocationFilter,
   setLevelFilter,
+  matches,
 }: TFilterSectionProps) => {
-  const locations: { label: string; value: string }[] = [
-    { label: "강남구", value: "gangnam" },
-    { label: "송파구", value: "songpa" },
-    { label: "마포구", value: "mapo" },
+  // 위치 필터
+  const locations: Array<{ label: string; value: string }> = [
+    { label: "전체 지역", value: "all" },
+    ...Array.from(new Set(matches.map((match) => match.location))).map(
+      (location) => ({
+        label: location.replace("서울시 ", ""),
+        value: location,
+      })
+    ),
   ];
 
-  const levels: { label: string; value: Level | "all" }[] = [
-    { label: "초급", value: "BEGINNER" },
-    { label: "중급", value: "INTERMEDIATE" },
-    { label: "상급", value: "ADVANCED" },
+  // 레벨 필터
+  const levelMapping: Record<Level, string> = {
+    BEGINNER: "초급",
+    INTERMEDIATE: "중급",
+    ADVANCED: "상급",
+  };
+
+  const levels: Array<{ label: string; value: Level | "all" }> = [
+    { label: "전체 레벨", value: "all" },
+    ...Array.from(new Set(matches.map((match) => match.level))).map(
+      (level) => ({
+        label: levelMapping[level as Level],
+        value: level as Level,
+      })
+    ),
   ];
-
-  const handleLocationChange = (value: string) => {
-    setLocationFilter(value);
-  };
-
-  const handleLevelChange = (value: Level | "all") => {
-    setLevelFilter(value);
-  };
 
   return (
     <View style={styles.filterSection}>
       <FilterPicker<string>
         selectedValue={locationFilter}
-        onValueChange={handleLocationChange}
+        onValueChange={setLocationFilter}
         items={locations}
-        placeholder="전체 지역"
       />
 
       <FilterPicker<Level | "all">
         selectedValue={levelFilter}
-        onValueChange={handleLevelChange}
+        onValueChange={setLevelFilter}
         items={levels}
-        placeholder="전체 레벨"
       />
     </View>
   );
@@ -59,7 +66,7 @@ const styles = StyleSheet.create({
   filterSection: {
     flexDirection: "row",
     marginHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 10,
     gap: 10,
   },
 });

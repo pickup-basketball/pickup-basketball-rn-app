@@ -1,13 +1,16 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 export type RootStackParamList = {
   Start: undefined;
   Login: undefined;
   Signup: undefined;
   MainTab: {
-    screen: "Matching" | "Courts" | "MyPage";
+    screen?: "Guide" | "Matching" | "Courts" | "MyPage";
   };
 };
+
+export type TNavigationProp = StackNavigationProp<RootStackParamList>;
 
 export type MatchingStackParamList = {
   MatchingMain: undefined;
@@ -32,6 +35,7 @@ export type MyPageStackParamList = {
 };
 
 export type MainTabParamList = {
+  Guide: undefined;
   Matching: undefined;
   Courts: undefined;
   MyPage: undefined;
