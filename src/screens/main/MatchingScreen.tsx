@@ -16,7 +16,6 @@ import {
 } from "../../components/common/Gradient";
 import { Post, Level } from "../../types/match";
 import { colors } from "../../styles/colors";
-import { DUMMY_POSTS } from "../../constants/dummy-data";
 import LoggedInHeader from "../../components/common/LoggedInHeader";
 import { MatchDetailModal } from "../../components/match/MatchDetailModal";
 import { useNavigation } from "@react-navigation/native";
@@ -36,6 +35,7 @@ export const MatchingScreen = () => {
   const fetchMatches = async () => {
     try {
       const response = await axiosInstance.get("/matches");
+      console.log("매칭 정보:", response.data.data);
       if (response.data?.data && Array.isArray(response.data.data)) {
         setMatches(response.data.data);
       } else {
@@ -51,6 +51,21 @@ export const MatchingScreen = () => {
   useEffect(() => {
     fetchMatches();
   }, []);
+
+  // 필터링된 매치 목록을 반환하는 함수
+  const getFilteredMatches = () => {
+    return matches.filter((match) => {
+      // 지역 필터
+      if (locationFilter !== "all" && match.location !== locationFilter) {
+        return false;
+      }
+      // 레벨 필터
+      if (levelFilter !== "all" && match.level !== levelFilter) {
+        return false;
+      }
+      return true;
+    });
+  };
 
   const renderMatchItem = ({ item }: { item: Post }) => (
     <TouchableOpacity
@@ -137,25 +152,16 @@ export const MatchingScreen = () => {
         levelFilter={levelFilter}
         setLocationFilter={setLocationFilter}
         setLevelFilter={setLevelFilter}
+        matches={matches}
       />
 
-      {/* <ScrollView style={styles.listContainer}>
-        {matches?.map((match) => (
-          <View key={match.id}>{renderMatchItem({ item: match })}</View>
-        ))}
-        {loading && (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>로딩 중...</Text>
-          </View>
-        )}
-      </ScrollView> */}
       <ScrollView style={styles.listContainer}>
         {loading ? (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>로딩 중...</Text>
           </View>
         ) : Array.isArray(matches) && matches.length > 0 ? (
-          matches.map((match) => (
+          getFilteredMatches().map((match) => (
             <View key={match.id}>{renderMatchItem({ item: match })}</View>
           ))
         ) : (
@@ -182,17 +188,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    padding: 20,
+    paddingTop: 20,
+    paddingLeft: 20,
+    paddingRight: 20,
+    paddingBottom: 10,
   },
   headerTitle: {
-    fontSize: 36,
+    fontSize: 25,
     fontWeight: "bold",
   },
   headerDescription: {
-    color: colors.grey.medium,
-    fontSize: 16,
+    color: colors.white,
+    fontSize: 14,
     marginTop: 5,
-    marginBottom: 15,
+    marginBottom: 10,
   },
   listContainer: {
     flex: 1,
@@ -234,7 +243,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   locationText: {
-    color: colors.grey.medium,
+    color: colors.white,
     marginLeft: 10,
   },
   infoText: {
