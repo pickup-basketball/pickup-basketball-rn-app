@@ -2,18 +2,16 @@ import React, { useState } from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Modal } from "react-native";
 import { Level } from "../../types/match";
 
-type FilterPickerProps<T> = {
+type FilterPickerProps<T extends string | number> = {
   selectedValue: T;
   onValueChange: (value: T) => void;
   items: Array<{ label: string; value: T }>;
-  placeholder: string;
 };
 
-export const FilterPicker = <T,>({
+export const FilterPicker = <T extends string | number>({
   selectedValue,
   onValueChange,
   items,
-  placeholder,
 }: FilterPickerProps<T>) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -22,8 +20,9 @@ export const FilterPicker = <T,>({
     setIsModalVisible(false);
   };
 
-  const selectedLabel =
-    items.find((item) => item.value === selectedValue)?.label || placeholder;
+  const selectedLabel = items.find(
+    (item) => item.value === selectedValue
+  )?.label;
 
   return (
     <View style={styles.pickerContainer}>
@@ -40,13 +39,11 @@ export const FilterPicker = <T,>({
             <TouchableOpacity
               style={styles.modalOption}
               onPress={() => handleSelect(selectedValue)}
-            >
-              <Text style={styles.modalOptionText}>{placeholder}</Text>
-            </TouchableOpacity>
+            ></TouchableOpacity>
 
             {items.map((item) => (
               <TouchableOpacity
-                key={item.value as string} // key로 문자열만 허용하므로 타입 캐스팅
+                key={String(item.value)} // key로 문자열만 허용하므로 타입 캐스팅
                 style={styles.modalOption}
                 onPress={() => handleSelect(item.value)}
               >
