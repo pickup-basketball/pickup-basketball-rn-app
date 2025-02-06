@@ -8,17 +8,6 @@ import Header from "../../components/common/Header";
 import SignupTitle from "../../components/auth/signup/SignupTitle";
 import LoginLink from "../../components/auth/login/LoginLink";
 
-// 네비게이션에서 사용할 스크린들의 타입 정의
-export type RootStackParamList = {
-  Start: undefined;
-  Login: undefined;
-  Signup: undefined;
-  Guide: undefined;
-  Matching: undefined;
-  Courts: undefined;
-  MyPage: undefined;
-};
-
 // 회원가입 1단계에서 입력 정보 타입
 type TStep1Data = {
   email: string;
@@ -34,6 +23,7 @@ const SignupScreen = () => {
     setSignupData(data);
     setStep(2);
   };
+
   const handleSignup = async (data: TSignupForm) => {
     return { success: true };
   };
