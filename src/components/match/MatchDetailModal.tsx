@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   location: {
-    color: colors.grey.medium,
+    color: colors.grey.light,
     marginLeft: 8,
   },
   levelBadge: {
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   infoLabel: {
-    color: colors.grey.medium,
+    color: colors.grey.light,
     fontSize: 12,
     marginLeft: 8,
   },
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sectionLabel: {
-    color: colors.grey.medium,
+    color: colors.grey.light,
     marginLeft: 8,
   },
   participantsCount: {
@@ -354,13 +354,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    color: colors.white,
+    color: colors.grey.light,
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 12,
   },
   description: {
-    color: colors.grey.medium,
+    color: colors.white,
     lineHeight: 20,
   },
   rulesSection: {
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   ruleText: {
-    color: colors.grey.medium,
+    color: colors.white,
     lineHeight: 20,
   },
   actionBar: {
