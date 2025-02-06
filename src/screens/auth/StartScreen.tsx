@@ -9,22 +9,16 @@ import {
   Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import type { StackNavigationProp } from "@react-navigation/stack";
 import { UserPlus } from "lucide-react-native";
-
-type RootStackParamList = {
-  Start: undefined;
-  Login: undefined;
-  Home: undefined;
-  Signup: undefined;
-};
-
-type TNavigationProp = StackNavigationProp<RootStackParamList>;
+import type { TNavigationProp } from "../../types/navigation";
 
 const { width } = Dimensions.get("window");
 
 const StartScreen = () => {
   const navigation = useNavigation<TNavigationProp>();
+  const handleStart = async () => {
+    navigation.navigate("Login");
+  };
   const [currentPage, setCurrentPage] = useState(0);
 
   const handleScroll = (event: any) => {
@@ -80,10 +74,7 @@ const StartScreen = () => {
         ))}
       </ScrollView>
 
-      <TouchableOpacity
-        style={styles.startButton}
-        onPress={() => navigation.navigate("Login")}
-      >
+      <TouchableOpacity style={styles.startButton} onPress={handleStart}>
         <Text style={styles.buttonText}>시작하기</Text>
       </TouchableOpacity>
     </SafeAreaView>
