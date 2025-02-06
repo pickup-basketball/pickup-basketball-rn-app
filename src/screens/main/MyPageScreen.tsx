@@ -12,6 +12,10 @@ import {
 import { User, Edit2 } from "lucide-react-native";
 import { colors } from "../../styles/colors";
 import LoggedInHeader from "../../components/common/LoggedInHeader";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { TNavigationProp } from "../../types/navigation";
+import { StackActions } from "@react-navigation/native";
 
 type UserProfile = {
   id: number;
@@ -42,10 +46,28 @@ const userProfile1 = {
 };
 
 export const MyPageScreen = () => {
+  const navigation = useNavigation<TNavigationProp>();
   const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(
     userProfile1
   );
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.multiRemove([
+        "isLoggedIn",
+        "rememberLogin",
+        "accessToken",
+        "refreshToken",
+      ]);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Login" }],
+      });
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
+  };
 
   const getPositionText = (position: string | null) =>
     ({
@@ -112,6 +134,13 @@ export const MyPageScreen = () => {
 
               <TouchableOpacity style={styles.editProfileButton}>
                 <Text style={styles.editProfileButtonText}>프로필 수정</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={handleLogout}
+              >
+                <Text style={styles.logoutButtonText}>로그아웃</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -244,5 +273,20 @@ const styles = StyleSheet.create({
   detailValue: {
     color: colors.white,
     fontWeight: "600",
+  },
+  logoutButton: {
+    marginTop: 24,
+    backgroundColor: colors.grey.dark,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.grey.medium,
+  },
+  logoutButtonText: {
+    color: colors.white,
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
