@@ -19,6 +19,7 @@ axiosInstance.interceptors.request.use(
     }
 
     const token = await AsyncStorage.getItem("accessToken");
+    // 토큰 없으면 Login으로 이동시킴
     if (!token) {
       console.warn("No access token found. Redirecting to login.");
       navigate("Login");
