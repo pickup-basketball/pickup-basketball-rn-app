@@ -39,6 +39,8 @@ const LoginForm = () => {
         ]);
         const [loginStatus] = await AsyncStorage.multiGet(["isLoggedIn"]);
         console.log("Updated isLoggedIn status:", loginStatus);
+        const accessToken = await AsyncStorage.getItem("accessToken");
+        console.log("accessToken:", accessToken);
         // 상태가 제대로 업데이트된 후에 네비게이션
         if (loginStatus[1] === "true") {
           navigation.dispatch(
