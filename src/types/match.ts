@@ -1,7 +1,7 @@
-type Level = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
-type Status = "OPEN" | "CLOSED";
+export type Level = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+export type Status = "OPEN" | "CLOSED";
 
-type Post = {
+export type Post = {
   id: number;
   title: string;
   courtName: string;
@@ -18,9 +18,55 @@ type Post = {
   hostId: number;
 };
 
-type TPosition = {
+export type TPosition = {
   position: string;
   value: string;
 };
 
-export { Level, Status, Post, TPosition };
+export type Match = {
+  id: number;
+  title: string;
+  description: string;
+  courtName: string;
+  location: string;
+  date: string;
+  time: string;
+  level: string;
+  currentPlayers: number;
+  maxPlayers: number;
+  cost: number;
+  rules: string;
+  hostId: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ParticipationMember = {
+  email: string;
+  nickname: string;
+  profileImage: string | null;
+  height: number;
+  weight: number;
+  position: string;
+  level: string;
+  mannerScore: number;
+};
+
+export type Participation = {
+  id: number;
+  userId: number;
+  matchingId: number;
+  status: string;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type MatchParticipation = {
+  match: Match;
+  participations: Array<{
+    member: ParticipationMember;
+    participation: Participation;
+  }>;
+};
