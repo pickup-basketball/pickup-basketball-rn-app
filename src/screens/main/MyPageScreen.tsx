@@ -1,5 +1,5 @@
 // screens/MyPage.tsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -12,81 +12,33 @@ import {
 import { User, Edit2 } from "lucide-react-native";
 import { colors } from "../../styles/colors";
 import LoggedInHeader from "../../components/common/LoggedInHeader";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import { TNavigationProp } from "../../types/navigation";
-import { StackActions } from "@react-navigation/native";
-
-type UserProfile = {
-  id: number;
-  email: string;
-  nickname: string;
-  profileImage: string | null;
-  height: number | null;
-  weight: number | null;
-  position: string | null;
-  level: string | null;
-  mannerScore: number;
-  socialProvider: string | null;
-  lastLoginAt: string;
-};
-
-const userProfile1 = {
-  id: 1,
-  email: "email@email.com",
-  nickname: "nickname",
-  profileImage: null,
-  height: 187,
-  weight: 80,
-  position: "PG",
-  level: "INTERMEDIATE",
-  mannerScore: 100,
-  socialProvider: "google",
-  lastLoginAt: "yesterday",
-};
+import { ProfileDetails } from "../../components/profile/ProfileDetails";
+import ParticipationList from "../../components/match/ParticipationList";
+import { useUserProfile } from "../../utils/hooks/useUserProfile";
+import { useParticipations } from "../../utils/hooks/useparticipations";
+import { useLogout } from "../../utils/hooks/useLogout";
 
 export const MyPageScreen = () => {
-  const navigation = useNavigation<TNavigationProp>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(
-    userProfile1
-  );
+  const handleLogout = useLogout();
+  const {
+    userProfile,
+    isLoading: isProfileLoading,
+    fetchProfile,
+  } = useUserProfile();
+  const {
+    participations,
+    isLoading: isParticipationsLoading,
+    error,
+    loadParticipations,
+  } = useParticipations();
 
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.multiRemove([
-        "isLoggedIn",
-        "rememberLogin",
-        "accessToken",
-        "refreshToken",
-      ]);
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Login" }],
-      });
-    } catch (error) {
-      console.error("로그아웃 실패:", error);
-    }
-  };
+  useEffect(() => {
+    loadParticipations();
+  }, [loadParticipations]);
 
-  const getPositionText = (position: string | null) =>
-    ({
-      PG: "포인트 가드",
-      SG: "슈팅 가드",
-      SF: "스몰 포워드",
-      PF: "파워 포워드",
-      C: "센터",
-    }[position || ""] || "미설정");
-
-  const getLevelText = (level: string | null) =>
-    level ? `${level}` : "미설정";
-
-  const renderDetailItem = (label: string, value: string) => (
-    <View style={styles.detailItem}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>{value}</Text>
-    </View>
-  );
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -145,19 +97,14 @@ export const MyPageScreen = () => {
             </View>
           </View>
 
-          <View style={styles.detailsGrid}>
-            {renderDetailItem("포지션", getPositionText(userProfile!.position))}
-            {renderDetailItem("실력", getLevelText(userProfile!.level))}
-            {renderDetailItem(
-              "신장",
-              userProfile?.height ? `${userProfile.height}cm` : "미설정"
-            )}
-            {renderDetailItem(
-              "체중",
-              userProfile?.weight ? `${userProfile.weight}kg` : "미설정"
-            )}
-          </View>
+          {userProfile && (
+            <ProfileDetails
+              profile={userProfile}
+              isLoading={isProfileLoading}
+            />
+          )}
         </View>
+        <ParticipationList participations={participations} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -252,27 +199,6 @@ const styles = StyleSheet.create({
   editProfileButtonText: {
     color: colors.white,
     fontWeight: "bold",
-  },
-  detailsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  detailItem: {
-    flex: 1,
-    minWidth: "45%",
-    backgroundColor: colors.grey.dark,
-    padding: 12,
-    borderRadius: 8,
-  },
-  detailLabel: {
-    color: colors.grey.medium,
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  detailValue: {
-    color: colors.white,
-    fontWeight: "600",
   },
   logoutButton: {
     marginTop: 24,
