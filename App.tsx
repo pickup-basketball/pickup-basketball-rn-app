@@ -69,7 +69,8 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      {/* 추후에 로그인 여부로 route방식 변경 예정 */}
+      <Stack.Navigator initialRouteName={isLoggedIn ? "MainTab" : "Login"}>
         <Stack.Screen
           name="Start"
           component={StartScreen}

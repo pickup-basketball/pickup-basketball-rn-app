@@ -1,5 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axiosInstance from "../../../api/axios-interceptor";
 import {
   View,
   TextInput,
@@ -10,10 +8,10 @@ import {
 import { Eye, EyeOff } from "lucide-react-native";
 import { useState } from "react";
 import SignupLink from "../signup/SignupLink";
-import { AxiosError } from "axios";
 import { useNavigation } from "@react-navigation/native";
 import { TNavigationProp } from "../../../types/navigation";
-import { StackActions } from "@react-navigation/native";
+import { handleLogin } from "../../../utils/auth/handleLogin";
+import axiosInstance from "../../../api/axios-interceptor";
 
 const LoginForm = () => {
   const navigation = useNavigation<TNavigationProp>();
@@ -23,45 +21,18 @@ const LoginForm = () => {
   const [rememberLogin, setRememberLogin] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
-    try {
-      const response = await axiosInstance.post("/auth/login", {
-        email,
-        password,
-      });
-
-      if (response.data?.data?.accessToken) {
-        await AsyncStorage.multiSet([
-          ["accessToken", response.data.data.accessToken],
-          ["refreshToken", response.data.data.refreshToken],
-          ["isLoggedIn", "true"],
-          ["rememberLogin", rememberLogin ? "true" : "false"],
-        ]);
-        const [loginStatus] = await AsyncStorage.multiGet(["isLoggedIn"]);
-        console.log("Updated isLoggedIn status:", loginStatus);
-        const accessToken = await AsyncStorage.getItem("accessToken");
-        console.log("accessToken:", accessToken);
-        // 상태가 제대로 업데이트된 후에 네비게이션
-        if (loginStatus[1] === "true") {
-          navigation.dispatch(
-            StackActions.replace("MainTab", { screen: "Guide" })
-          );
-        }
-      } else {
-        console.error("No token in response:", response.data);
-        setError("로그인 응답에 토큰이 없습니다");
-      }
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        console.log("Error details:", {
-          response: error.response?.data,
-          status: error.response?.status,
-          headers: error.response?.headers,
-        });
-      }
-
-      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
-    }
+  const onLoginPress = async () => {
+    await handleLogin({
+      email,
+      password,
+      rememberLogin,
+      navigation,
+      axiosInstance,
+      onError: setError,
+      onSuccess: () => {
+        // 추가적인 성공 처리
+      },
+    });
   };
 
   return (
@@ -129,7 +100,7 @@ const LoginForm = () => {
       </View>
 
       {/* 로그인 버튼 */}
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+      <TouchableOpacity style={styles.loginButton} onPress={onLoginPress}>
         <Text style={styles.loginButtonText}>로그인</Text>
       </TouchableOpacity>
 

@@ -6,6 +6,7 @@ import { ViewStyle, TextStyle } from "react-native";
 type TGradientWithBoxProps = {
   icon?: React.ReactNode;
   text?: string;
+  children?: React.ReactNode;
   style?: ViewStyle;
   textStyle?: TextStyle;
   start?: { x: number; y: number };
@@ -47,22 +48,31 @@ type TGradientPoint = {
   y: number;
 };
 type TGradientTextProps = {
-  text: string;
+  text?: string;
   style?: any;
   start?: TGradientPoint;
   end?: TGradientPoint;
+  children?: React.ReactNode;
 };
 
-const GradientText = ({ text, style, start, end }: TGradientTextProps) => (
+const GradientText = ({
+  text,
+  style,
+  start,
+  end,
+  children,
+}: TGradientTextProps) => (
   <MaskedView
-    maskElement={<Text style={[{ fontWeight: "bold" }, style]}>{text}</Text>}
+    maskElement={
+      <Text style={[{ fontWeight: "bold" }, style]}>{children || text}</Text>
+    }
   >
     <LinearGradient
       colors={["#FF8800", "#FF00B2"]}
       start={{ x: 0, y: 6 }}
       end={{ x: 1, y: 0 }}
     >
-      <Text style={[{ opacity: 0 }, style]}>{text}</Text>
+      <Text style={[{ opacity: 0 }, style]}>{children || text}</Text>
     </LinearGradient>
   </MaskedView>
 );

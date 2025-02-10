@@ -10,6 +10,14 @@ const axiosInstance = axios.create({
   },
 });
 
+const refreshTokenRequest = axios.create({
+  baseURL: "http://13.125.58.70:8080", // 추가
+  timeout: 5000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 // Request Interceptor
 axiosInstance.interceptors.request.use(
   async (config) => {
@@ -46,7 +54,7 @@ axiosInstance.interceptors.response.use(
       try {
         // refreshToken으로 새 accessToken 발급
         const refreshToken = await AsyncStorage.getItem("refreshToken");
-        const response = await axios.post("/auth/refresh", {
+        const response = await refreshTokenRequest.post("/auth/refresh", {
           refreshToken: refreshToken,
         });
 
