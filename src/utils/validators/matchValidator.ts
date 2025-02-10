@@ -59,5 +59,3 @@ export const validateForm = (
     errors,
   };
 };
-
-// handleSubmit 함수 수정
