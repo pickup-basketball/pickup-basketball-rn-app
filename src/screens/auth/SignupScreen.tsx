@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { SafeAreaView, StyleSheet, View } from "react-native";
+import { SafeAreaView, StyleSheet, View, Alert } from "react-native";
 import SignupStep1 from "../../components/auth/signup/SignupStep1";
 import SignupStep2 from "../../components/auth/signup/SignupStep2";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -7,6 +7,12 @@ import { TSignupForm } from "../../types/signup";
 import Header from "../../components/common/Header";
 import SignupTitle from "../../components/auth/signup/SignupTitle";
 import LoginLink from "../../components/auth/login/LoginLink";
+import axiosInstance from "../../api/axios-interceptor";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../types/navigation";
+import SuccessModal from "../../components/common/SuccessModal";
+import { handleLogin } from "../../utils/auth/handleLogin";
 
 // 회원가입 1단계에서 입력 정보 타입
 type TStep1Data = {
@@ -16,8 +22,10 @@ type TStep1Data = {
 };
 
 const SignupScreen = () => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [step, setStep] = useState(1);
   const [signupData, setSignupData] = useState<TStep1Data | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleStep1Complete = (data: TStep1Data) => {
     setSignupData(data);
@@ -25,17 +33,76 @@ const SignupScreen = () => {
   };
 
   const handleSignup = async (data: TSignupForm) => {
-    return { success: true };
+    try {
+      const payload = {
+        email: data.email,
+        password: data.password,
+        nickname: data.nickname,
+        height: Number(data.height),
+        weight: Number(data.weight),
+        position: data.position,
+        level: data.level,
+      };
+
+      const response = await axiosInstance.post("/member", payload);
+
+      // 회원가입 성공
+      if (response.status === 201 || response.status === 200) {
+        return { success: true };
+      }
+
+      return { success: false };
+    } catch (error) {
+      console.error("회원가입 API 요청 실패:", error);
+      return { success: false };
+    }
   };
 
   const handleSignupComplete = async (data: TSignupForm) => {
     try {
       const result = await handleSignup(data);
 
-      if (result.success) await AsyncStorage.setItem("isLoggedIn", "true");
+      if (result.success) {
+        const loginResult = await handleLogin({
+          email: data.email,
+          password: data.password,
+          navigation,
+          axiosInstance,
+          defaultRoute: {
+            name: "MainTab",
+            params: { screen: "Guide" },
+          },
+          onError: (message) => {
+            console.error("자동 로그인 실패:", message);
+            // 로그인 실패 시 처리
+            Alert.alert(
+              "로그인 오류",
+              "회원가입은 완료되었으나 자동 로그인에 실패했습니다. 다시 로그인해주세요."
+            );
+            navigation.navigate("Login");
+          },
+          onSuccess: () => {
+            setShowSuccessModal(true);
+          },
+        });
+
+        if (!loginResult) {
+          // 로그인 실패 시 로그인 화면으로 이동
+          navigation.navigate("Login");
+        }
+      }
     } catch (error) {
       console.error("회원가입 실패:", error);
+      Alert.alert("오류 발생", "잠시 후 다시 시도해주세요.");
     }
+  };
+
+  const handleModalClose = () => {
+    setShowSuccessModal(false);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "MainTab", params: { screen: "Guide" } }],
+    });
   };
 
   return (
@@ -53,6 +120,7 @@ const SignupScreen = () => {
             onSubmit={handleSignupComplete}
           />
         )}
+        {/* <SuccessModal visible={showSuccessModal} onClose={handleModalClose} /> */}
         <LoginLink />
       </View>
     </SafeAreaView>
