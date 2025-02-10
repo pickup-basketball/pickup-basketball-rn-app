@@ -66,6 +66,7 @@ export type Participation = {
 export type MatchParticipation = {
   match: Match;
   participations: Array<{
+    id: number;
     member: ParticipationMember;
     participation: Participation;
   }>;
