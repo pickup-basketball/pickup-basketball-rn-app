@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import {
   TSignupStep2Props,
-  TNavigationProp,
   TPosition,
   TLevel,
   positions,
@@ -20,6 +19,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { validateSignupStep2 } from "../../../utils/validators/signupValidator";
+import { TNavigationProp } from "../../../types/navigation";
 
 const SignupStep2: React.FC<TSignupStep2Props> = ({
   step1Data,
