@@ -13,9 +13,9 @@ import { User, Edit2 } from "lucide-react-native";
 import { colors } from "../../styles/colors";
 import LoggedInHeader from "../../components/common/LoggedInHeader";
 import { ProfileDetails } from "../../components/profile/ProfileDetails";
-import ParticipationList from "../../components/match/ParticipationList";
-import { useUserProfile } from "../../utils/hooks/useUserProfile";
+import ParticipationList from "../../components/mypage/ParticipationList";
 import { useParticipations } from "../../utils/hooks/useparticipations";
+import { useUserProfile } from "../../utils/hooks/useUserProfile";
 import { useLogout } from "../../utils/hooks/useLogout";
 
 export const MyPageScreen = () => {
@@ -25,12 +25,8 @@ export const MyPageScreen = () => {
     isLoading: isProfileLoading,
     fetchProfile,
   } = useUserProfile();
-  const {
-    participations,
-    isLoading: isParticipationsLoading,
-    error,
-    loadParticipations,
-  } = useParticipations();
+  const { participations, isLoading, error, loadParticipations } =
+    useParticipations();
 
   useEffect(() => {
     loadParticipations();
@@ -43,7 +39,7 @@ export const MyPageScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <LoggedInHeader />
-      <ScrollView>
+      <ScrollView nestedScrollEnabled>
         <View style={styles.header}>
           <Text style={styles.title}>마이페이지</Text>
           <Text style={styles.subtitle}>내 정보와 활동 내역을 관리하세요</Text>
@@ -84,27 +80,29 @@ export const MyPageScreen = () => {
                 )}
               </View>
 
-              <TouchableOpacity style={styles.editProfileButton}>
-                <Text style={styles.editProfileButtonText}>프로필 수정</Text>
-              </TouchableOpacity>
+              <View style={styles.buttonGrid}>
+                <TouchableOpacity style={styles.editProfileButton}>
+                  <Text style={styles.editProfileButtonText}>프로필 수정</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.logoutButton}
-                onPress={handleLogout}
-              >
-                <Text style={styles.logoutButtonText}>로그아웃</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.logoutButton}
+                  onPress={handleLogout}
+                >
+                  <Text style={styles.logoutButtonText}>로그아웃</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
 
           {userProfile && (
-            <ProfileDetails
-              profile={userProfile}
-              isLoading={isProfileLoading}
-            />
+            <ProfileDetails profile={userProfile} isLoading={isLoading} />
           )}
         </View>
-        <ParticipationList participations={participations} />
+        <ParticipationList
+          participations={participations}
+          onUpdate={loadParticipations}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -189,9 +187,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   editProfileButton: {
-    marginTop: 16,
     backgroundColor: colors.primary,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 8,
     alignSelf: "flex-start",
@@ -201,10 +198,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   logoutButton: {
-    marginTop: 24,
     backgroundColor: colors.grey.dark,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
     borderRadius: 8,
     alignItems: "center",
     borderWidth: 1,
@@ -214,5 +210,10 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontWeight: "bold",
     fontSize: 16,
+  },
+  buttonGrid: {
+    flexDirection: "row",
+    marginTop: 10,
+    justifyContent: "space-between",
   },
 });
