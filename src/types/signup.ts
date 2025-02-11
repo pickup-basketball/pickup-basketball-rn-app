@@ -1,4 +1,3 @@
-// signup.ts
 export type TSignupStep1Props = {
   onNext: (data: TStep1Form) => void;
 };
@@ -29,3 +28,14 @@ export type TPosition = (typeof positions)[number];
 
 export const levels = ["BEGINNER", "INTERMEDIATE", "ADVANCED"] as const;
 export type TLevel = (typeof levels)[number];
+
+type LevelWithLabel = {
+  label: string;
+  value: TLevel;
+};
+
+export const levelsWithLabel: LevelWithLabel[] = [
+  { label: "초급", value: "BEGINNER" },
+  { label: "중급", value: "INTERMEDIATE" },
+  { label: "상급", value: "ADVANCED" },
+];
