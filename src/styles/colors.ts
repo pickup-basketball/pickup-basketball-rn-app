@@ -12,4 +12,5 @@ export const colors = {
     intermediate: "#EAB308",
     advanced: "#EF4444",
   },
+  error: "#DC3545",
 };
