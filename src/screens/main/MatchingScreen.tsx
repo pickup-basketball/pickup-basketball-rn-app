@@ -22,6 +22,8 @@ import { useNavigation } from "@react-navigation/native";
 import { WriteScreenNavigationProp } from "../../types/navigation";
 import { formatLevel, getLevelStyle } from "../../utils/formatters";
 import axiosInstance from "../../api/axios-interceptor";
+import ParticipationModal from "../../components/match/ParticipationModal";
+import { useMatchJoin } from "../../utils/hooks/useMatchJoin";
 
 export const MatchingScreen = () => {
   const navigation = useNavigation<WriteScreenNavigationProp>();
@@ -29,8 +31,13 @@ export const MatchingScreen = () => {
   const [selectedMatch, setSelectedMatch] = useState<Post | null>(null);
   const [locationFilter, setLocationFilter] = useState("all");
   const [levelFilter, setLevelFilter] = useState<Level | "all">("all");
-  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const {
+    isJoinModalVisible,
+    selectedMatchForJoin,
+    handleJoin,
+    handleCloseJoinModal,
+  } = useMatchJoin();
 
   const fetchMatches = async () => {
     try {
@@ -105,7 +112,12 @@ export const MatchingScreen = () => {
           {item.cost === 0 ? "무료" : `${item.cost.toLocaleString()}원`}
         </Text>
         {item.status === "OPEN" ? (
-          <TouchableOpacity style={styles.joinButton}>
+          <TouchableOpacity
+            style={styles.joinButton}
+            onPress={() => {
+              handleJoin(item);
+            }}
+          >
             <GradientWithBox
               text="참여하기"
               style={{
@@ -146,7 +158,6 @@ export const MatchingScreen = () => {
           />
         </TouchableOpacity>
       </View>
-
       <FilterSection
         locationFilter={locationFilter}
         levelFilter={levelFilter}
@@ -154,7 +165,6 @@ export const MatchingScreen = () => {
         setLevelFilter={setLevelFilter}
         matches={matches}
       />
-
       <ScrollView style={styles.listContainer}>
         {loading ? (
           <View style={styles.loadingContainer}>
@@ -170,7 +180,6 @@ export const MatchingScreen = () => {
           </View>
         )}
       </ScrollView>
-
       {selectedMatch ? (
         <MatchDetailModal
           match={selectedMatch}
@@ -178,6 +187,14 @@ export const MatchingScreen = () => {
           onClose={() => setSelectedMatch(null)}
         />
       ) : null}
+      {selectedMatchForJoin && (
+        <ParticipationModal
+          isVisible={isJoinModalVisible}
+          onClose={handleCloseJoinModal}
+          matchId={selectedMatchForJoin.id}
+          onParticipate={fetchMatches}
+        />
+      )}
     </SafeAreaView>
   );
 };
