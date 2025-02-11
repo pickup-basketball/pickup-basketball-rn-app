@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Modal,
 } from "react-native";
 import { ArrowLeft, X } from "lucide-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Picker } from "@react-native-picker/picker";
 import axiosInstance from "../../api/axios-interceptor";
 import { WriteScreenNavigationProp } from "../../types/navigation";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,6 +18,7 @@ import { colors } from "../../styles/colors";
 import { GradientWithBox } from "../../components/common/Gradient";
 import { validateForm } from "../../utils/validators/matchValidator";
 import { TFormData } from "../../utils/validators/types";
+import { levelsWithLabel, TLevel } from "../../types/signup";
 
 type Props = {
   navigation: WriteScreenNavigationProp;
@@ -41,6 +42,16 @@ const WriteMatchForm = ({ navigation }: Props) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showLevelModal, setShowLevelModal] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string>("");
+
+  const handleSelectLevel = (level: TLevel) => {
+    setFormData((prev) => ({
+      ...prev,
+      level,
+    }));
+    setShowLevelModal(false);
+  };
 
   const handleDateTimeChange = (event: any, selectedDate: Date | undefined) => {
     if (selectedDate) {
@@ -72,21 +83,15 @@ const WriteMatchForm = ({ navigation }: Props) => {
 
   const handleSubmit = async () => {
     try {
-      // 폼 유효성 검사
       const { isValid, errors: validationErrors } = validateForm(formData);
 
       if (!isValid) {
         setErrors(validationErrors);
-        // 첫 번째 에러 위치로 스크롤
-        const firstError = Object.keys(validationErrors)[0];
-        // 스크롤 로직은 별도로 구현 필요
         return;
       }
 
-      // 로딩 상태 설정
       setIsLoading(true);
 
-      // 규칙 문자열로 변환
       const rulesString = formData.rules
         .filter((rule) => rule.trim() !== "")
         .join(",");
@@ -105,11 +110,9 @@ const WriteMatchForm = ({ navigation }: Props) => {
         rules: rulesString,
       };
 
-      // API 요청
       const response = await axiosInstance.post("/matches", payload);
 
       if (response.status === 201 || response.status === 200) {
-        // 성공 알림 표시
         Alert.alert("성공", "매치가 성공적으로 생성되었습니다", [
           { text: "확인", onPress: () => navigation.navigate("MatchingMain") },
         ]);
@@ -117,7 +120,6 @@ const WriteMatchForm = ({ navigation }: Props) => {
     } catch (error) {
       console.error("Error creating match:", error);
 
-      // error 타입 가드
       interface ApiError {
         response?: {
           data?: {
@@ -126,7 +128,6 @@ const WriteMatchForm = ({ navigation }: Props) => {
         };
       }
 
-      // 에러 메시지 처리
       let errorMessage = "매치 생성 중 오류가 발생했습니다";
 
       if (error && typeof error === "object" && "response" in error) {
@@ -160,53 +161,65 @@ const WriteMatchForm = ({ navigation }: Props) => {
           </Text>
         </View>
 
-        {/* 제목 */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>제목</Text>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              focusedInput === "title" && styles.inputFocused,
+            ]}
             value={formData.title}
             onChangeText={(text) =>
               setFormData((prev) => ({ ...prev, title: text }))
             }
             placeholder="매력적인 제목을 입력해주세요"
             placeholderTextColor="#666"
+            onFocus={() => setFocusedInput("title")}
+            onBlur={() => setFocusedInput("")}
           />
         </View>
 
-        {/* 코트 정보 */}
         <View style={styles.row}>
           <View style={styles.halfInput}>
             <Text style={styles.label}>코트 이름</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                focusedInput === "courtName" && styles.inputFocused,
+              ]}
               value={formData.courtName}
               onChangeText={(text) =>
                 setFormData((prev) => ({ ...prev, courtName: text }))
               }
               placeholder="예) 올림픽공원 농구장"
               placeholderTextColor="#666"
+              onFocus={() => setFocusedInput("courtName")}
+              onBlur={() => setFocusedInput("")}
             />
           </View>
           <View style={styles.halfInput}>
             <Text style={styles.label}>위치</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                focusedInput === "location" && styles.inputFocused,
+              ]}
               value={formData.location}
               onChangeText={(text) =>
                 setFormData((prev) => ({ ...prev, location: text }))
               }
               placeholder="예) 서울 송파구 방이동"
               placeholderTextColor="#666"
+              onFocus={() => setFocusedInput("location")}
+              onBlur={() => setFocusedInput("")}
             />
           </View>
         </View>
 
-        {/* 날짜/시간 선택 */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>날짜 및 시간</Text>
           <TouchableOpacity
-            style={styles.input}
+            style={[styles.input, styles.dateTimeInput]}
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={styles.dateTimeText}>
@@ -220,37 +233,61 @@ const WriteMatchForm = ({ navigation }: Props) => {
             <DateTimePicker
               value={new Date()}
               mode="datetime"
-              // is24Hour={true}
               display="default"
               onChange={handleDateTimeChange}
             />
           )}
         </View>
 
-        {/* 레벨 선택 */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>레벨</Text>
-          <View style={[styles.pickerContainer, { height: 50 }]}>
-            <Picker
-              selectedValue={formData.level}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, level: value }))
-              }
-              style={[styles.picker, { height: 50 }]}
-            >
-              <Picker.Item label="초급" value="BEGINNER" />
-              <Picker.Item label="중급" value="INTERMEDIATE" />
-              <Picker.Item label="상급" value="ADVANCED" />
-            </Picker>
-          </View>
+          <TouchableOpacity
+            style={[styles.input, styles.levelInput]}
+            onPress={() => setShowLevelModal(true)}
+          >
+            <Text style={{ color: formData.level ? "#FFFFFF" : "#666" }}>
+              {formData.level
+                ? levelsWithLabel.find((l) => l.value === formData.level)?.label
+                : "레벨을 선택해주세요"}
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* 인원/참가비 */}
+        <Modal
+          visible={showLevelModal}
+          transparent={true}
+          animationType="slide"
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>레벨 선택</Text>
+              {levelsWithLabel.map((level) => (
+                <TouchableOpacity
+                  key={level.value}
+                  style={styles.modalItem}
+                  onPress={() => handleSelectLevel(level.value)}
+                >
+                  <Text style={styles.modalItemText}>{level.label}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setShowLevelModal(false)}
+              >
+                <Text style={styles.modalCloseButtonText}>닫기</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
         <View style={styles.row}>
           <View style={styles.halfInput}>
             <Text style={styles.label}>최대 인원</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                focusedInput === "maxPlayers" && styles.inputFocused,
+              ]}
               value={String(formData.maxPlayers)}
               onChangeText={(text) =>
                 setFormData((prev) => ({
@@ -260,12 +297,17 @@ const WriteMatchForm = ({ navigation }: Props) => {
               }
               keyboardType="numeric"
               placeholderTextColor="#666"
+              onFocus={() => setFocusedInput("maxPlayers")}
+              onBlur={() => setFocusedInput("")}
             />
           </View>
           <View style={styles.halfInput}>
             <Text style={styles.label}>참가비</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                focusedInput === "cost" && styles.inputFocused,
+              ]}
               value={String(formData.cost)}
               onChangeText={(text) =>
                 setFormData((prev) => ({
@@ -275,15 +317,20 @@ const WriteMatchForm = ({ navigation }: Props) => {
               }
               keyboardType="numeric"
               placeholderTextColor="#666"
+              onFocus={() => setFocusedInput("cost")}
+              onBlur={() => setFocusedInput("")}
             />
           </View>
         </View>
 
-        {/* 설명 */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>매치 설명</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[
+              styles.input,
+              styles.textArea,
+              focusedInput === "description" && styles.inputFocused,
+            ]}
             value={formData.description}
             onChangeText={(text) =>
               setFormData((prev) => ({ ...prev, description: text }))
@@ -292,10 +339,11 @@ const WriteMatchForm = ({ navigation }: Props) => {
             placeholderTextColor="#666"
             multiline
             numberOfLines={4}
+            onFocus={() => setFocusedInput("description")}
+            onBlur={() => setFocusedInput("")}
           />
         </View>
 
-        {/* 규칙 */}
         <View style={styles.inputContainer}>
           <View style={styles.ruleHeader}>
             <Text style={styles.label}>주의사항 (규칙)</Text>
@@ -306,7 +354,11 @@ const WriteMatchForm = ({ navigation }: Props) => {
           {formData.rules.map((rule, index) => (
             <View key={index} style={styles.ruleContainer}>
               <TextInput
-                style={[styles.input, styles.ruleInput]}
+                style={[
+                  styles.input,
+                  styles.ruleInput,
+                  focusedInput === `rule_${index}` && styles.inputFocused,
+                ]}
                 value={rule}
                 onChangeText={(text) => {
                   const newRules = [...formData.rules];
@@ -315,6 +367,8 @@ const WriteMatchForm = ({ navigation }: Props) => {
                 }}
                 placeholder="예) 정시 출발, 체육관 규칙 준수 등"
                 placeholderTextColor="#666"
+                onFocus={() => setFocusedInput(`rule_${index}`)}
+                onBlur={() => setFocusedInput("")}
               />
               {index > 0 && (
                 <TouchableOpacity
@@ -328,15 +382,16 @@ const WriteMatchForm = ({ navigation }: Props) => {
           ))}
         </View>
 
-        {/* 제출 버튼 */}
-        <TouchableOpacity onPress={handleSubmit}>
+        <TouchableOpacity
+          style={styles.submitButtonContainer}
+          onPress={handleSubmit}
+        >
           <GradientWithBox
             text="매치 생성하기"
             style={{ justifyContent: "center" }}
           />
         </TouchableOpacity>
 
-        {/* 에러 메시지 */}
         {errors.submit && (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{errors.submit}</Text>
@@ -356,7 +411,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    marginBottom: 24,
+    marginBottom: 32,
   },
   title: {
     fontSize: 28,
@@ -369,15 +424,16 @@ const styles = StyleSheet.create({
     color: "#A1A1AA",
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: 24,
+    gap: 16,
   },
   halfInput: {
-    width: "48%",
+    flex: 1,
   },
   label: {
     color: "#FFFFFF",
@@ -390,26 +446,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#3F3F46",
     borderRadius: 12,
-    padding: 12,
+    padding: 16,
     color: "#FFFFFF",
     fontSize: 16,
+    height: 56,
   },
-  pickerContainer: {
-    backgroundColor: "rgba(39, 39, 42, 0.5)",
-    borderWidth: 1,
-    borderColor: "#3F3F46",
-    borderRadius: 12,
-    overflow: "hidden",
-    height: 50,
+  inputFocused: {
+    borderColor: colors.primary,
+  },
+  dateTimeInput: {
     justifyContent: "center",
   },
-  picker: {
-    color: "#FFFFFF",
-    height: 50,
+  levelInput: {
+    justifyContent: "center",
   },
   textArea: {
-    height: 100,
+    height: 120,
     textAlignVertical: "top",
+    paddingTop: 16,
   },
   ruleHeader: {
     flexDirection: "row",
@@ -435,17 +489,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#3F3F46",
     borderRadius: 8,
   },
-  submitButton: {
-    backgroundColor: "#F97316",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 24,
-  },
-  submitButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
+  submitButtonContainer: {
+    marginBottom: 24,
   },
   errorContainer: {
     marginTop: 16,
@@ -470,6 +515,48 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: colors.grey.light,
     fontSize: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: colors.grey.dark,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: "50%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
+    color: colors.white,
+  },
+  modalItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.grey.medium,
+    height: 56,
+    justifyContent: "center",
+  },
+  modalItemText: {
+    fontSize: 16,
+    color: colors.white,
+  },
+  modalCloseButton: {
+    marginTop: 15,
+    padding: 15,
+    backgroundColor: colors.grey.medium,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  modalCloseButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

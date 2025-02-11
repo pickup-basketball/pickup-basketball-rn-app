@@ -1,7 +1,7 @@
 // components/match/ParticipationList.tsx
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import { Calendar, Clock, MapPin, Users } from "lucide-react-native";
+import { Calendar, Clock, MapPin, Users, Trash2 } from "lucide-react-native";
 import { colors } from "../../styles/colors";
 import ParticipationRequestModal from "./ParticipationRequestModal";
 import { GradientText, GradientWithBox } from "../common/Gradient";
@@ -83,7 +83,45 @@ const ParticipationList = ({
       }
     }
   };
-
+  const handleDelete = async (matchId: number) => {
+    try {
+      Alert.alert("매치 삭제", "정말로 이 매치를 삭제하시겠습니까?", [
+        {
+          text: "취소",
+          style: "cancel",
+        },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const response = await axiosInstance.delete(
+                `/matches/${matchId}`
+              );
+              if (response.status === 200) {
+                Alert.alert("성공", "매치가 삭제되었습니다");
+                onUpdate?.(); // 목록 새로고침
+              }
+            } catch (error) {
+              if (axios.isAxiosError(error)) {
+                console.error("Error details:", {
+                  status: error.response?.status,
+                  statusText: error.response?.statusText,
+                  data: error.response?.data,
+                });
+                const errorMessage =
+                  error.response?.data?.message ||
+                  "매치 삭제 중 오류가 발생했습니다";
+                Alert.alert("오류", errorMessage);
+              }
+            }
+          },
+        },
+      ]);
+    } catch (error) {
+      Alert.alert("오류", "매치 삭제 중 오류가 발생했습니다");
+    }
+  };
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>매치 현황</Text>
@@ -95,14 +133,11 @@ const ParticipationList = ({
               <View style={styles.card}>
                 <View style={styles.header}>
                   <Text style={styles.title}>{item.match.title}</Text>
-                  {/* <View style={styles.statusBadge}> */}
-                  {/* <GradientWithBox style={styles.statusBadge}>
-                    <Text style={styles.statusText}>{item.match.status}</Text>
-                  </GradientWithBox> */}
                   <GradientText>
-                    <Text style={styles.statusText}>{item.match.status}</Text>
+                    <Text style={styles.statusText}>
+                      {item.match.status === "OPEN" ? "모집 중" : "마감"}
+                    </Text>
                   </GradientText>
-                  {/* </View> */}
                 </View>
 
                 <View style={styles.infoRow}>
@@ -131,27 +166,61 @@ const ParticipationList = ({
                   </View>
                 </View>
 
-                {item.participations.length > 0 && (
+                {item.participations.length > 0 ? (
                   <View style={styles.participationSection}>
                     <Text style={styles.participationCount}>
                       참여 신청 {item.participations.length}건
                     </Text>
-
-                    <TouchableOpacity
-                      onPress={() => handleOpenModal(item.participations)}
-                    >
-                      <GradientWithBox
-                        icon={
-                          <Users
-                            color={colors.white}
-                            size={20}
-                            style={{ marginRight: 5 }}
+                    <View style={styles.buttonRow}>
+                      <View style={styles.mainButtonContainer}>
+                        <TouchableOpacity
+                          onPress={() => handleOpenModal(item.participations)}
+                        >
+                          <GradientWithBox
+                            icon={
+                              <Users
+                                color={colors.white}
+                                size={20}
+                                style={{ marginRight: 5 }}
+                              />
+                            }
+                            text="참여 관리하기"
+                            style={{ justifyContent: "center" }}
                           />
-                        }
-                        text="참여 관리하러 가기"
-                        style={{ justifyContent: "center" }}
-                      />
-                    </TouchableOpacity>
+                        </TouchableOpacity>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={() => handleDelete(item.match.id)}
+                      >
+                        <Trash2 color={colors.error} size={24} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : (
+                  <View style={styles.participationSection}>
+                    <View style={styles.buttonRow}>
+                      <View style={styles.mainButtonContainer}>
+                        <View style={styles.disabledButton}>
+                          <View style={styles.buttonContent}>
+                            <Users
+                              color={colors.grey.light}
+                              size={20}
+                              style={{ marginRight: 5 }}
+                            />
+                            <Text style={styles.disabledButtonText}>
+                              참가를 기다려주세요
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={() => handleDelete(item.match.id)}
+                      >
+                        <Trash2 color={colors.error} size={24} />
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 )}
               </View>
@@ -268,6 +337,39 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: "500",
     marginBottom: 8,
+  },
+  disabledButton: {
+    backgroundColor: colors.grey.dark,
+    padding: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.grey.medium,
+    opacity: 0.7, // 약간 흐리게
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  disabledButtonText: {
+    color: colors.grey.light,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  deleteButton: {
+    padding: 10,
+    backgroundColor: colors.grey.dark,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.error,
+  },
+  mainButtonContainer: {
+    flex: 1,
   },
 });
 

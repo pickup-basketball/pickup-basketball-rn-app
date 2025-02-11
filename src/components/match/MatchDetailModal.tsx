@@ -22,6 +22,8 @@ import { colors } from "../../styles/colors";
 import { Post } from "../../types/match";
 import { formatLevel, getLevelColor } from "../../utils/formatters";
 import { GradientWithBox } from "../common/Gradient";
+import { useMatchJoin } from "../../utils/hooks/useMatchJoin";
+import ParticipationModal from "./ParticipationModal";
 
 type TMatchDetailModalProps = {
   match: Post;
@@ -34,7 +36,12 @@ export const MatchDetailModal = ({
   isOpen,
   onClose,
 }: TMatchDetailModalProps) => {
-  const [showJoinModal, setShowJoinModal] = useState(false);
+  const {
+    isJoinModalVisible,
+    selectedMatchForJoin,
+    handleJoin,
+    handleCloseJoinModal,
+  } = useMatchJoin();
 
   const ProgressBar = ({ current, max }: { current: number; max: number }) => (
     <View style={styles.progressContainer}>
@@ -178,7 +185,7 @@ export const MatchDetailModal = ({
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={match.status === "CLOSED"}
-                onPress={() => setShowJoinModal(true)}
+                onPress={() => handleJoin(match)}
               >
                 <GradientWithBox
                   text={match.status === "CLOSED" ? "마감됨" : "참여하기"}
@@ -193,6 +200,14 @@ export const MatchDetailModal = ({
           </View>
         </View>
       </View>
+      {selectedMatchForJoin && (
+        <ParticipationModal
+          isVisible={isJoinModalVisible}
+          onClose={handleCloseJoinModal}
+          matchId={selectedMatchForJoin.id}
+          onParticipate={onClose}
+        />
+      )}
     </Modal>
   );
 };
