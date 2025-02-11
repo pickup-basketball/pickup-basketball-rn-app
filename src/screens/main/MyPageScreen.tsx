@@ -14,9 +14,9 @@ import { colors } from "../../styles/colors";
 import LoggedInHeader from "../../components/common/LoggedInHeader";
 import { ProfileDetails } from "../../components/profile/ProfileDetails";
 import ParticipationList from "../../components/mypage/ParticipationList";
-import { useParticipations } from "../../utils/hooks/useparticipations";
 import { useUserProfile } from "../../utils/hooks/useUserProfile";
 import { useLogout } from "../../utils/hooks/useLogout";
+import { useParticipations } from "../../utils/hooks/useParticipations";
 
 export const MyPageScreen = () => {
   const handleLogout = useLogout();
