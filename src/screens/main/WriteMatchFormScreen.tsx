@@ -19,6 +19,21 @@ import { GradientWithBox } from "../../components/common/Gradient";
 import { validateForm } from "../../utils/validators/matchValidator";
 import { TFormData } from "../../utils/validators/types";
 import { levelsWithLabel, TLevel } from "../../types/signup";
+import { matchEventEmitter } from "../../utils/event";
+import axios from "axios";
+
+// 에러 메시지 컴포넌트
+const ErrorMessage = ({ error }: { error: string }) => (
+  <Text style={styles.fieldError}>{error}</Text>
+);
+
+// 필수 필드 라벨 컴포넌트
+const RequiredLabel = ({ text }: { text: string }) => (
+  <View style={styles.labelContainer}>
+    <Text style={styles.label}>{text}</Text>
+    <Text style={styles.requiredMark}>*</Text>
+  </View>
+);
 
 type Props = {
   navigation: WriteScreenNavigationProp;
@@ -109,15 +124,31 @@ const WriteMatchForm = ({ navigation }: Props) => {
         cost: Number(formData.cost),
         rules: rulesString,
       };
+      console.log("Sending payload:", JSON.stringify(payload, null, 2));
 
       const response = await axiosInstance.post("/matches", payload);
 
       if (response.status === 201 || response.status === 200) {
+        matchEventEmitter.emit("matchCreated");
         Alert.alert("성공", "매치가 성공적으로 생성되었습니다", [
           { text: "확인", onPress: () => navigation.navigate("MatchingMain") },
         ]);
       }
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(
+          "Error details:",
+          JSON.stringify(
+            {
+              status: error.response?.status,
+              message: error.response?.data?.message,
+              data: error.response?.data,
+            },
+            null,
+            2
+          )
+        );
+      }
       console.error("Error creating match:", error);
 
       interface ApiError {
@@ -162,11 +193,12 @@ const WriteMatchForm = ({ navigation }: Props) => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>제목</Text>
+          <RequiredLabel text="제목" />
           <TextInput
             style={[
               styles.input,
               focusedInput === "title" && styles.inputFocused,
+              errors.title && styles.inputError,
             ]}
             value={formData.title}
             onChangeText={(text) =>
@@ -177,15 +209,17 @@ const WriteMatchForm = ({ navigation }: Props) => {
             onFocus={() => setFocusedInput("title")}
             onBlur={() => setFocusedInput("")}
           />
+          {errors.title && <ErrorMessage error={errors.title} />}
         </View>
 
         <View style={styles.row}>
           <View style={styles.halfInput}>
-            <Text style={styles.label}>코트 이름</Text>
+            <RequiredLabel text="코트 이름" />
             <TextInput
               style={[
                 styles.input,
                 focusedInput === "courtName" && styles.inputFocused,
+                errors.courtName && styles.inputError,
               ]}
               value={formData.courtName}
               onChangeText={(text) =>
@@ -196,13 +230,15 @@ const WriteMatchForm = ({ navigation }: Props) => {
               onFocus={() => setFocusedInput("courtName")}
               onBlur={() => setFocusedInput("")}
             />
+            {errors.courtName && <ErrorMessage error={errors.courtName} />}
           </View>
           <View style={styles.halfInput}>
-            <Text style={styles.label}>위치</Text>
+            <RequiredLabel text="위치" />
             <TextInput
               style={[
                 styles.input,
                 focusedInput === "location" && styles.inputFocused,
+                errors.location && styles.inputError,
               ]}
               value={formData.location}
               onChangeText={(text) =>
@@ -213,13 +249,18 @@ const WriteMatchForm = ({ navigation }: Props) => {
               onFocus={() => setFocusedInput("location")}
               onBlur={() => setFocusedInput("")}
             />
+            {errors.location && <ErrorMessage error={errors.location} />}
           </View>
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>날짜 및 시간</Text>
+          <RequiredLabel text="날짜 및 시간" />
           <TouchableOpacity
-            style={[styles.input, styles.dateTimeInput]}
+            style={[
+              styles.input,
+              styles.dateTimeInput,
+              errors.datetime && styles.inputError,
+            ]}
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={styles.dateTimeText}>
@@ -228,6 +269,7 @@ const WriteMatchForm = ({ navigation }: Props) => {
                 : "날짜와 시간을 선택하세요"}
             </Text>
           </TouchableOpacity>
+          {errors.datetime && <ErrorMessage error={errors.datetime} />}
 
           {showDatePicker && (
             <DateTimePicker
@@ -240,9 +282,13 @@ const WriteMatchForm = ({ navigation }: Props) => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>레벨</Text>
+          <RequiredLabel text="레벨" />
           <TouchableOpacity
-            style={[styles.input, styles.levelInput]}
+            style={[
+              styles.input,
+              styles.levelInput,
+              errors.level && styles.inputError,
+            ]}
             onPress={() => setShowLevelModal(true)}
           >
             <Text style={{ color: formData.level ? "#FFFFFF" : "#666" }}>
@@ -251,6 +297,7 @@ const WriteMatchForm = ({ navigation }: Props) => {
                 : "레벨을 선택해주세요"}
             </Text>
           </TouchableOpacity>
+          {errors.level && <ErrorMessage error={errors.level} />}
         </View>
 
         <Modal
@@ -282,11 +329,12 @@ const WriteMatchForm = ({ navigation }: Props) => {
 
         <View style={styles.row}>
           <View style={styles.halfInput}>
-            <Text style={styles.label}>최대 인원</Text>
+            <RequiredLabel text="최대 인원" />
             <TextInput
               style={[
                 styles.input,
                 focusedInput === "maxPlayers" && styles.inputFocused,
+                errors.maxPlayers && styles.inputError,
               ]}
               value={String(formData.maxPlayers)}
               onChangeText={(text) =>
@@ -296,10 +344,12 @@ const WriteMatchForm = ({ navigation }: Props) => {
                 }))
               }
               keyboardType="numeric"
+              placeholder="2~20명"
               placeholderTextColor="#666"
               onFocus={() => setFocusedInput("maxPlayers")}
               onBlur={() => setFocusedInput("")}
             />
+            {errors.maxPlayers && <ErrorMessage error={errors.maxPlayers} />}
           </View>
           <View style={styles.halfInput}>
             <Text style={styles.label}>참가비</Text>
@@ -307,6 +357,7 @@ const WriteMatchForm = ({ navigation }: Props) => {
               style={[
                 styles.input,
                 focusedInput === "cost" && styles.inputFocused,
+                errors.cost && styles.inputError,
               ]}
               value={String(formData.cost)}
               onChangeText={(text) =>
@@ -316,20 +367,23 @@ const WriteMatchForm = ({ navigation }: Props) => {
                 }))
               }
               keyboardType="numeric"
+              placeholder="0원 이상"
               placeholderTextColor="#666"
               onFocus={() => setFocusedInput("cost")}
               onBlur={() => setFocusedInput("")}
             />
+            {errors.cost && <ErrorMessage error={errors.cost} />}
           </View>
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>매치 설명</Text>
+          <RequiredLabel text="매치 설명" />
           <TextInput
             style={[
               styles.input,
               styles.textArea,
               focusedInput === "description" && styles.inputFocused,
+              errors.description && styles.inputError,
             ]}
             value={formData.description}
             onChangeText={(text) =>
@@ -342,11 +396,12 @@ const WriteMatchForm = ({ navigation }: Props) => {
             onFocus={() => setFocusedInput("description")}
             onBlur={() => setFocusedInput("")}
           />
+          {errors.description && <ErrorMessage error={errors.description} />}
         </View>
 
         <View style={styles.inputContainer}>
           <View style={styles.ruleHeader}>
-            <Text style={styles.label}>주의사항 (규칙)</Text>
+            <RequiredLabel text="주의사항 (규칙)" />
             <TouchableOpacity onPress={handleAddRule}>
               <Text style={styles.addRuleButton}>+ 규칙 추가</Text>
             </TouchableOpacity>
@@ -358,6 +413,7 @@ const WriteMatchForm = ({ navigation }: Props) => {
                   styles.input,
                   styles.ruleInput,
                   focusedInput === `rule_${index}` && styles.inputFocused,
+                  errors.rules && styles.inputError,
                 ]}
                 value={rule}
                 onChangeText={(text) => {
@@ -380,8 +436,13 @@ const WriteMatchForm = ({ navigation }: Props) => {
               )}
             </View>
           ))}
+          {errors.rules && <ErrorMessage error={errors.rules} />}
         </View>
-
+        {errors.submit && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{errors.submit}</Text>
+          </View>
+        )}
         <TouchableOpacity
           style={styles.submitButtonContainer}
           onPress={handleSubmit}
@@ -391,12 +452,6 @@ const WriteMatchForm = ({ navigation }: Props) => {
             style={{ justifyContent: "center" }}
           />
         </TouchableOpacity>
-
-        {errors.submit && (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{errors.submit}</Text>
-          </View>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -453,6 +508,9 @@ const styles = StyleSheet.create({
   },
   inputFocused: {
     borderColor: colors.primary,
+  },
+  inputError: {
+    borderColor: "#EF4444",
   },
   dateTimeInput: {
     justifyContent: "center",
@@ -557,6 +615,22 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 16,
     fontWeight: "bold",
+  },
+  // 새로 추가된 스타일
+  fieldError: {
+    color: "#EF4444",
+    fontSize: 12,
+    marginTop: 4,
+  },
+  labelContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  requiredMark: {
+    color: "#EF4444",
+    marginLeft: 4,
+    fontSize: 16,
   },
 });
 
