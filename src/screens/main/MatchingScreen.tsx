@@ -42,9 +42,12 @@ export const MatchingScreen = () => {
   const fetchMatches = async () => {
     try {
       const response = await axiosInstance.get("/matches");
-      console.log("매칭 정보:", response.data.data);
-      if (response.data?.data && Array.isArray(response.data.data)) {
-        setMatches(response.data.data);
+      // console.log("매칭 정보2:", JSON.stringify(response, null, 2));
+      if (
+        response.data?.matchResponses &&
+        Array.isArray(response.data.matchResponses)
+      ) {
+        setMatches(response.data.matchResponses);
       } else {
         setMatches([]);
       }

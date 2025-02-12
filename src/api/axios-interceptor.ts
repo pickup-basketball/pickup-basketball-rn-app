@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
 });
 
 const refreshTokenRequest = axios.create({
-  baseURL: "http://13.125.58.70:8080", // 추가
+  baseURL: "http://13.125.58.70:8080",
   timeout: 5000,
   headers: {
     "Content-Type": "application/json",
@@ -21,8 +21,8 @@ const refreshTokenRequest = axios.create({
 // Request Interceptor
 axiosInstance.interceptors.request.use(
   async (config) => {
-    // 로그인 요청일 경우 토큰 체크를 하지 않음
-    if (config.url === "/auth/login") {
+    // 로그인, 회원가입 요청일 경우 토큰 체크를 하지 않음
+    if (config.url === "/auth/login" || config.url === "/auth/signup") {
       return config;
     }
 

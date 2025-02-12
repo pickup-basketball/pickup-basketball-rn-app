@@ -1,5 +1,5 @@
 // screens/MyPage.tsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -16,7 +16,9 @@ import { ProfileDetails } from "../../components/profile/ProfileDetails";
 import ParticipationList from "../../components/mypage/ParticipationList";
 import { useUserProfile } from "../../utils/hooks/useUserProfile";
 import { useLogout } from "../../utils/hooks/useLogout";
-import { useParticipations } from "../../utils/hooks/useParticipations";
+import { useParticipations } from "../../utils/hooks/useparticipations";
+import EditProfileModal from "../../components/profile/EditProfileModal";
+import { matchEventEmitter } from "../../utils/event";
 
 export const MyPageScreen = () => {
   const handleLogout = useLogout();
@@ -27,6 +29,20 @@ export const MyPageScreen = () => {
   } = useUserProfile();
   const { participations, isLoading, error, loadParticipations } =
     useParticipations();
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+
+  useEffect(() => {
+    // 매치 생성 이벤트 리스너 등록
+    const listener = () => {
+      loadParticipations();
+    };
+    matchEventEmitter.addListener("matchCreated", listener);
+
+    // 컴포넌트 언마운트 시 리스너 제거
+    return () => {
+      matchEventEmitter.removeListener("matchCreated", listener);
+    };
+  }, []);
 
   useEffect(() => {
     loadParticipations();
@@ -48,14 +64,14 @@ export const MyPageScreen = () => {
         <View style={styles.profileContainer}>
           <View style={styles.profileHeader}>
             <View style={styles.imageContainer}>
-              {userProfile?.profileImage ? (
+              {/* {userProfile?.profileImage ? (
                 <Image
                   source={{ uri: userProfile.profileImage }}
                   style={styles.profileImage}
                 />
               ) : (
                 <User color={colors.grey.light} size={48} />
-              )}
+              )} */}
               <TouchableOpacity style={styles.editButton}>
                 <Edit2 color={colors.white} size={16} />
               </TouchableOpacity>
@@ -71,19 +87,29 @@ export const MyPageScreen = () => {
                     매너 점수: {userProfile?.mannerScore.toFixed(1)}
                   </Text>
                 </View>
-                {userProfile?.socialProvider && (
+                {/* {userProfile?.socialProvider && (
                   <View style={styles.badge}>
                     <Text style={styles.badgeText}>
                       {userProfile.socialProvider} 로그인
                     </Text>
                   </View>
-                )}
+                )} */}
               </View>
 
               <View style={styles.buttonGrid}>
-                <TouchableOpacity style={styles.editProfileButton}>
+                <TouchableOpacity
+                  style={styles.editProfileButton}
+                  onPress={() => setIsEditModalVisible(true)}
+                >
                   <Text style={styles.editProfileButtonText}>프로필 수정</Text>
                 </TouchableOpacity>
+
+                <EditProfileModal
+                  isVisible={isEditModalVisible}
+                  onClose={() => setIsEditModalVisible(false)}
+                  currentProfile={userProfile} // userProfile을 그대로 전달
+                  onUpdate={fetchProfile}
+                />
 
                 <TouchableOpacity
                   style={styles.logoutButton}

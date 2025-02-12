@@ -16,6 +16,12 @@ interface LoginParams {
   };
 }
 
+interface LoginResponse {
+  jti: string;
+  accessToken: string;
+  refreshToken: string;
+}
+
 export const handleLogin = async ({
   email,
   password,
@@ -27,23 +33,25 @@ export const handleLogin = async ({
   defaultRoute = { name: "MainTab", params: { screen: "guide" } },
 }: LoginParams): Promise<boolean> => {
   try {
-    const response = await axiosInstance.post("/auth/login", {
+    const response = await axiosInstance.post<LoginResponse>("/auth/login", {
       email,
       password,
     });
 
-    if (response.data?.data?.accessToken) {
+    if (response.data?.accessToken) {
       await AsyncStorage.multiSet([
-        ["accessToken", response.data.data.accessToken],
-        ["refreshToken", response.data.data.refreshToken],
+        ["jti", response.data.jti],
+        ["accessToken", response.data.accessToken],
+        ["refreshToken", response.data.refreshToken],
         ["isLoggedIn", "true"],
         ["rememberLogin", rememberLogin ? "true" : "false"],
       ]);
 
-      // Optional success callback
+      // 잠시 대기하여 AsyncStorage가 완전히 저장되도록 함
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       onSuccess?.();
 
-      // Navigation reset
       navigation.reset({
         index: 0,
         routes: [defaultRoute],
