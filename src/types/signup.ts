@@ -23,6 +23,14 @@ export type TSignupStep2Props = {
   onSubmit: (allData: TSignupForm) => void;
 };
 
+export const positionMapping = {
+  PG: "포인트 가드 (PG)",
+  SG: "슈팅 가드 (SG)",
+  SF: "스몰 포워드 (SF)",
+  PF: "파워 포워드 (PF)",
+  C: "센터 (C)",
+} as const;
+
 export const positions = ["PG", "SG", "SF", "PF", "C"] as const;
 export type TPosition = (typeof positions)[number];
 

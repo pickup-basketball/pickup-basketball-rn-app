@@ -26,42 +26,33 @@ export default function App() {
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      const [loginStatus, rememberLogin] = await AsyncStorage.multiGet([
-        "isLoggedIn",
-        "rememberLogin",
-      ]);
-
-      if (rememberLogin[1] !== "true") {
-        await AsyncStorage.setItem("isLoggedIn", "false");
-        setIsLoggedIn(false);
-      } else {
-        setIsLoggedIn(loginStatus[1] === "true");
-      }
-
-      setIsLoading(false);
-    };
-
-    checkLoginStatus();
-
-    // AsyncStorage 변경 감지를 위한 interval 설정
-    const interval = setInterval(checkLoginStatus, 1000);
-
-    return () => clearInterval(interval);
-  });
-
-  useEffect(() => {
-    const getAllKeys = async () => {
       try {
+        const [loginStatus, rememberLogin] = await AsyncStorage.multiGet([
+          "isLoggedIn",
+          "rememberLogin",
+        ]);
+
         const keys = await AsyncStorage.getAllKeys();
         const items = await AsyncStorage.multiGet(keys);
-        console.log("All AsyncStorage Items:", items);
+        console.log("All AsyncStorage Items:", JSON.stringify(items, null, 2));
+
+        if (rememberLogin[1] !== "true") {
+          await AsyncStorage.setItem("isLoggedIn", "false");
+          setIsLoggedIn(false);
+        } else {
+          setIsLoggedIn(loginStatus[1] === "true");
+        }
+
+        setIsLoading(false);
       } catch (error) {
-        console.error("Error getting all AsyncStorage items:", error);
+        console.error("Error checking login status:", error);
+        setIsLoading(false);
       }
     };
 
-    getAllKeys();
-  }, []);
+    // 초기 체크만 수행
+    checkLoginStatus();
+  }, []); // interval 제거
 
   if (isLoading) {
     return null;
