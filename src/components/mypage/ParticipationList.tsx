@@ -21,6 +21,8 @@ const ParticipationList = ({
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  console.log("participations", JSON.stringify(participations, null, 2));
+
   const handleOpenModal = (participations: ParticipationDetail[]) => {
     setSelectedMatchParticipations(participations);
     setIsModalVisible(true);
@@ -31,15 +33,27 @@ const ParticipationList = ({
     setSelectedMatchParticipations([]);
   };
 
-  const handleApprove = async (participationDetail: ParticipationDetail) => {
-    console.log("Starting Approve with participation:", participationDetail);
+  const handleParticipationStatus = async (
+    participationDetail: ParticipationDetail,
+    status: "ACCEPTED" | "REJECTED"
+  ) => {
+    const requestBody = {
+      participationId: participationDetail.participation.id,
+      status,
+    };
+
+    console.log("requestBody", JSON.stringify(requestBody, null, 2));
+
     try {
-      const response = await axiosInstance.post("/matches/accept", {
-        participationId: participationDetail.participation.id,
-      });
+      const response = await axiosInstance.post("/matches/status", requestBody);
+
+      console.log("handleStatus:", JSON.stringify(response, null, 2));
 
       if (response.status === 200) {
-        Alert.alert("성공", "참가 신청이 수락되었습니다");
+        Alert.alert(
+          "성공",
+          `참가 신청이 ${status === "ACCEPTED" ? "수락" : "거절"}되었습니다`
+        );
         handleCloseModal();
         onUpdate?.();
       }
@@ -52,38 +66,22 @@ const ParticipationList = ({
         });
         const errorMessage =
           error.response?.data?.message ||
-          "참가 신청 수락 중 오류가 발생했습니다";
+          `참가 신청 ${
+            status === "ACCEPTED" ? "수락" : "거절"
+          } 중 오류가 발생했습니다`;
         Alert.alert("오류", errorMessage);
       }
     }
   };
-  const handleReject = async (participationDetail: ParticipationDetail) => {
-    console.log("Starting reject with participation:", participationDetail);
-    try {
-      const response = await axiosInstance.post("/matches/rejected", {
-        participationId: participationDetail.participation.id,
-      });
 
-      if (response.status === 200) {
-        Alert.alert("성공", "참가 신청이 거절되었습니다");
-        handleCloseModal();
-        onUpdate?.(); // 목록 새로고침
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error details:", {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-        });
-        const errorMessage =
-          error.response?.data?.message ||
-          "참가 신청 거절 중 오류가 발생했습니다";
-        Alert.alert("오류", errorMessage);
-      }
-    }
-  };
+  const handleApprove = (participationDetail: ParticipationDetail) =>
+    handleParticipationStatus(participationDetail, "ACCEPTED");
+
+  const handleReject = (participationDetail: ParticipationDetail) =>
+    handleParticipationStatus(participationDetail, "REJECTED");
+
   const handleDelete = async (matchId: number) => {
+    console.log("matchId", matchId);
     try {
       Alert.alert("매치 삭제", "정말로 이 매치를 삭제하시겠습니까?", [
         {
