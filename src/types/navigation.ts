@@ -1,5 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { Participation } from "./participation";
 
 export type RootStackParamList = {
   Start: undefined;
@@ -7,6 +8,10 @@ export type RootStackParamList = {
   Signup: undefined;
   MainTab: {
     screen?: "Guide" | "Matching" | "Courts" | "MyPage";
+  };
+  EditMatch: {
+    matchData: any;
+    onUpdate?: () => void;
   };
 };
 
@@ -32,6 +37,18 @@ export type GuideStackParamList = {
 
 export type MyPageStackParamList = {
   MyPageMain: undefined;
+  EditMatch: {
+    matchData: any;
+    onUpdate?: () => void;
+  };
+};
+
+type MyPageNavigationProp = StackNavigationProp<MyPageStackParamList>;
+
+export type ParticipationListProps = {
+  participations: Participation[];
+  onUpdate?: () => void;
+  navigation: MyPageNavigationProp;
 };
 
 export type MainTabParamList = {

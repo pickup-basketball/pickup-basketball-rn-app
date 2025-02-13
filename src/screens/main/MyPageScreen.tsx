@@ -20,7 +20,7 @@ import { useParticipations } from "../../utils/hooks/useparticipations";
 import EditProfileModal from "../../components/profile/EditProfileModal";
 import { matchEventEmitter } from "../../utils/event";
 
-export const MyPageScreen = () => {
+export const MyPageScreen = ({ navigation }: { navigation: any }) => {
   const handleLogout = useLogout();
   const {
     userProfile,
@@ -64,14 +64,6 @@ export const MyPageScreen = () => {
         <View style={styles.profileContainer}>
           <View style={styles.profileHeader}>
             <View style={styles.imageContainer}>
-              {/* {userProfile?.profileImage ? (
-                <Image
-                  source={{ uri: userProfile.profileImage }}
-                  style={styles.profileImage}
-                />
-              ) : (
-                <User color={colors.grey.light} size={48} />
-              )} */}
               <TouchableOpacity style={styles.editButton}>
                 <Edit2 color={colors.white} size={16} />
               </TouchableOpacity>
@@ -87,13 +79,6 @@ export const MyPageScreen = () => {
                     매너 점수: {userProfile?.mannerScore.toFixed(1)}
                   </Text>
                 </View>
-                {/* {userProfile?.socialProvider && (
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>
-                      {userProfile.socialProvider} 로그인
-                    </Text>
-                  </View>
-                )} */}
               </View>
 
               <View style={styles.buttonGrid}>
@@ -128,6 +113,7 @@ export const MyPageScreen = () => {
         <ParticipationList
           participations={participations}
           onUpdate={loadParticipations}
+          navigation={navigation}
         />
       </ScrollView>
     </SafeAreaView>

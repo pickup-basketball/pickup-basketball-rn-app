@@ -1,7 +1,14 @@
 // components/match/ParticipationList.tsx
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import { Calendar, Clock, MapPin, Users, Trash2 } from "lucide-react-native";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  Trash2,
+  Edit2,
+} from "lucide-react-native";
 import { colors } from "../../styles/colors";
 import ParticipationRequestModal from "./ParticipationRequestModal";
 import { GradientText, GradientWithBox } from "../common/Gradient";
@@ -11,15 +18,26 @@ import {
   ParticipationDetail,
   ParticipationListProps,
 } from "../../types/participation";
+import { useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "../../types/navigation";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 const ParticipationList = ({
   participations,
   onUpdate,
 }: ParticipationListProps) => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
   const [selectedMatchParticipations, setSelectedMatchParticipations] =
     useState<ParticipationDetail[]>([]);
-
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const handleEditMatch = (matchData: any) => {
+    navigation.navigate("EditMatch", {
+      matchData,
+      onUpdate,
+    });
+  };
 
   console.log("participations", JSON.stringify(participations, null, 2));
 
@@ -120,6 +138,53 @@ const ParticipationList = ({
       Alert.alert("오류", "매치 삭제 중 오류가 발생했습니다");
     }
   };
+  const renderActionButtons = (item: any) => (
+    <View style={styles.buttonRow}>
+      <View style={styles.mainButtonContainer}>
+        {item.participations.length > 0 ? (
+          <TouchableOpacity
+            onPress={() => handleOpenModal(item.participations)}
+          >
+            <GradientWithBox
+              icon={
+                <Users
+                  color={colors.white}
+                  size={20}
+                  style={{ marginRight: 5 }}
+                />
+              }
+              text="참여 관리하기"
+              style={{ justifyContent: "center" }}
+            />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.disabledButton}>
+            <View style={styles.buttonContent}>
+              <Users
+                color={colors.grey.light}
+                size={20}
+                style={{ marginRight: 5 }}
+              />
+              <Text style={styles.disabledButtonText}>참가를 기다려주세요</Text>
+            </View>
+          </View>
+        )}
+      </View>
+      <TouchableOpacity
+        style={styles.editButton}
+        onPress={() => handleEditMatch(item.match)}
+      >
+        <Edit2 color={colors.primary} size={24} />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => handleDelete(item.match.id)}
+      >
+        <Trash2 color={colors.error} size={24} />
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>매치 현황</Text>
@@ -164,63 +229,14 @@ const ParticipationList = ({
                   </View>
                 </View>
 
-                {item.participations.length > 0 ? (
-                  <View style={styles.participationSection}>
+                <View style={styles.participationSection}>
+                  {item.participations.length > 0 && (
                     <Text style={styles.participationCount}>
                       참여 신청 {item.participations.length}건
                     </Text>
-                    <View style={styles.buttonRow}>
-                      <View style={styles.mainButtonContainer}>
-                        <TouchableOpacity
-                          onPress={() => handleOpenModal(item.participations)}
-                        >
-                          <GradientWithBox
-                            icon={
-                              <Users
-                                color={colors.white}
-                                size={20}
-                                style={{ marginRight: 5 }}
-                              />
-                            }
-                            text="참여 관리하기"
-                            style={{ justifyContent: "center" }}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                      <TouchableOpacity
-                        style={styles.deleteButton}
-                        onPress={() => handleDelete(item.match.id)}
-                      >
-                        <Trash2 color={colors.error} size={24} />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ) : (
-                  <View style={styles.participationSection}>
-                    <View style={styles.buttonRow}>
-                      <View style={styles.mainButtonContainer}>
-                        <View style={styles.disabledButton}>
-                          <View style={styles.buttonContent}>
-                            <Users
-                              color={colors.grey.light}
-                              size={20}
-                              style={{ marginRight: 5 }}
-                            />
-                            <Text style={styles.disabledButtonText}>
-                              참가를 기다려주세요
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                      <TouchableOpacity
-                        style={styles.deleteButton}
-                        onPress={() => handleDelete(item.match.id)}
-                      >
-                        <Trash2 color={colors.error} size={24} />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
+                  )}
+                  {renderActionButtons(item)}
+                </View>
               </View>
             </View>
           ))
@@ -368,6 +384,13 @@ const styles = StyleSheet.create({
   },
   mainButtonContainer: {
     flex: 1,
+  },
+  editButton: {
+    padding: 10,
+    backgroundColor: colors.grey.dark,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.primary,
   },
 });
 

@@ -1,3 +1,5 @@
+import { NavigationProp } from "@react-navigation/native";
+
 // types/participation.ts
 export type ParticipationDetail = {
   id: number;
@@ -32,4 +34,5 @@ export type Participation = {
 export type ParticipationListProps = {
   participations: Participation[];
   onUpdate?: () => void;
+  navigation: NavigationProp<any>;
 };

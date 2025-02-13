@@ -5,12 +5,14 @@ import GuideScreen from "../screens/main/GuideScreen";
 import { MatchingScreen } from "../screens/main/MatchingScreen";
 import { MyPageScreen } from "../screens/main/MyPageScreen";
 import WriteMatchForm from "../screens/main/WriteMatchFormScreen";
+import { EditMatchScreen } from "../components/match/EditMatchScreen";
+import { MyPageStackParamList } from "../types/navigation";
 
 // 스택 네비게이터 생성
 const GuideStack = createStackNavigator();
 const MatchingStack = createStackNavigator();
 const CourtsStack = createStackNavigator();
-const MyPageStack = createStackNavigator();
+const MyPageStack = createStackNavigator<MyPageStackParamList>();
 const Tab = createBottomTabNavigator();
 
 // Guide 스택
@@ -64,6 +66,11 @@ const MypageStackNavigator = () => {
       <MyPageStack.Screen
         name="MyPageMain"
         component={MyPageScreen}
+        options={{ headerShown: false }}
+      />
+      <MyPageStack.Screen
+        name="EditMatch"
+        component={EditMatchScreen}
         options={{ headerShown: false }}
       />
     </MyPageStack.Navigator>
