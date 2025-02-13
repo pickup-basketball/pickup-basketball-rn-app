@@ -9,7 +9,7 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-import { User, Edit2 } from "lucide-react-native";
+import { Edit2 } from "lucide-react-native";
 import { colors } from "../../styles/colors";
 import LoggedInHeader from "../../components/common/LoggedInHeader";
 import { ProfileDetails } from "../../components/profile/ProfileDetails";
