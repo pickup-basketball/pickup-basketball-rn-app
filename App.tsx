@@ -15,34 +15,16 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // asyncStorage 비울 때
-  // useEffect(() => {
-  //   const clearStorage = async () => {
-  //     await AsyncStorage.clear();
-  //     console.log("Storage cleared");
-  //   };
-  //   clearStorage();
-  // }, []);
-
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const [loginStatus, rememberLogin] = await AsyncStorage.multiGet([
-          "isLoggedIn",
-          "rememberLogin",
-        ]);
+        const [loginStatus] = await AsyncStorage.multiGet(["isLoggedIn"]);
 
         const keys = await AsyncStorage.getAllKeys();
         const items = await AsyncStorage.multiGet(keys);
         console.log("All AsyncStorage Items:", JSON.stringify(items, null, 2));
 
-        if (rememberLogin[1] !== "true") {
-          await AsyncStorage.setItem("isLoggedIn", "false");
-          setIsLoggedIn(false);
-        } else {
-          setIsLoggedIn(loginStatus[1] === "true");
-        }
-
+        setIsLoggedIn(loginStatus[1] === "true");
         setIsLoading(false);
       } catch (error) {
         console.error("Error checking login status:", error);
@@ -50,13 +32,8 @@ export default function App() {
       }
     };
 
-    // 초기 체크만 수행
     checkLoginStatus();
-  }, []); // interval 제거
-
-  if (isLoading) {
-    return null;
-  }
+  }, []);
 
   return (
     <NavigationContainer>
