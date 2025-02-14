@@ -85,15 +85,6 @@ const LoginForm = () => {
 
       {/* 로그인 상태 유지 & 비밀번호 찾기 */}
       <View style={styles.optionsContainer}>
-        <TouchableOpacity
-          style={styles.rememberContainer}
-          onPress={() => setRememberLogin(!rememberLogin)}
-        >
-          <View
-            style={[styles.checkbox, rememberLogin && styles.checkboxChecked]}
-          />
-          <Text style={styles.rememberText}>로그인 상태 유지</Text>
-        </TouchableOpacity>
         <TouchableOpacity>
           <Text style={styles.forgotPassword}>비밀번호 찾기</Text>
         </TouchableOpacity>
@@ -174,7 +165,7 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "center",
     marginBottom: 20,
   },

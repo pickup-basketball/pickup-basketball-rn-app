@@ -24,7 +24,6 @@ interface LoginResponse {
 export const handleLogin = async ({
   email,
   password,
-  rememberLogin = false,
   navigation,
   axiosInstance,
   onError,
@@ -43,7 +42,6 @@ export const handleLogin = async ({
         ["accessToken", response.data.accessToken],
         ["refreshToken", response.data.refreshToken],
         ["isLoggedIn", "true"],
-        ["rememberLogin", rememberLogin ? "true" : "false"],
       ]);
 
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -60,8 +58,7 @@ export const handleLogin = async ({
       return true;
     } else {
       console.error("No token in response:", response.data);
-      const errorMessage = "로그인 응답에 토큰이 없습니다";
-      onError?.(errorMessage);
+      onError?.("로그인 응답에 토큰이 없습니다");
       return false;
     }
   } catch (error) {
@@ -73,8 +70,7 @@ export const handleLogin = async ({
       });
     }
 
-    const errorMessage = "이메일 또는 비밀번호가 올바르지 않습니다.";
-    onError?.(errorMessage);
+    onError?.("이메일 또는 비밀번호가 올바르지 않습니다.");
     return false;
   }
 };
