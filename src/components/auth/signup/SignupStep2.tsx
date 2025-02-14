@@ -46,7 +46,6 @@ const SignupStep2: React.FC<TSignupStep2Props> = ({
 
     try {
       await onSubmit({ ...step1Data, ...formData });
-      await AsyncStorage.setItem("isLoggedIn", "true");
     } catch (error) {
       console.error("회원가입 실패:", error);
     }
