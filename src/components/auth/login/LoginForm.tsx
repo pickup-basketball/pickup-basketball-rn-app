@@ -29,9 +29,6 @@ const LoginForm = () => {
       navigation,
       axiosInstance,
       onError: setError,
-      onSuccess: () => {
-        // 추가적인 성공 처리
-      },
     });
   };
 

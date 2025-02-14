@@ -20,7 +20,7 @@ import EditProfileModal from "../../components/profile/EditProfileModal";
 import { matchEventEmitter } from "../../utils/event";
 import WithdrawalModal from "../../components/mypage/WithdrawalModal";
 import OptionsModal from "../../components/mypage/OptionsModal";
-import { withdrawMembership } from "../../api/\bmember";
+import { withdrawMembership } from "../../api/member";
 
 export const MyPageScreen = ({ navigation }: { navigation: any }) => {
   const handleLogout = useLogout();
