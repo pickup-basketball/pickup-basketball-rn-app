@@ -4,12 +4,11 @@ import {
   SafeAreaView,
   View,
   Text,
-  Image,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
 } from "react-native";
-import { Edit2 } from "lucide-react-native";
+import { MoreVertical, Edit2 } from "lucide-react-native";
 import { colors } from "../../styles/colors";
 import LoggedInHeader from "../../components/common/LoggedInHeader";
 import { ProfileDetails } from "../../components/profile/ProfileDetails";
@@ -19,6 +18,9 @@ import { useLogout } from "../../utils/hooks/useLogout";
 import { useParticipations } from "../../utils/hooks/useparticipations";
 import EditProfileModal from "../../components/profile/EditProfileModal";
 import { matchEventEmitter } from "../../utils/event";
+import WithdrawalModal from "../../components/mypage/WithdrawalModal";
+import OptionsModal from "../../components/mypage/OptionsModal";
+import { withdrawMembership } from "../../api/\bmember";
 
 export const MyPageScreen = ({ navigation }: { navigation: any }) => {
   const handleLogout = useLogout();
@@ -30,15 +32,34 @@ export const MyPageScreen = ({ navigation }: { navigation: any }) => {
   const { participations, isLoading, error, loadParticipations } =
     useParticipations();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isWithdrawalModalVisible, setIsWithdrawalModalVisible] =
+    useState(false);
+  const [isOptionsModalVisible, setIsOptionsModalVisible] = useState(false);
+
+  //회원탈퇴핸들러
+  const handleWithdrawal = async () => {
+    // 가드 클로즈: 조건 불만족시 빠른 반환
+    if (!userProfile?.id) {
+      alert("사용자 정보를 찾을 수 없습니다.");
+      return;
+    }
+
+    // 메인 로직
+    try {
+      await withdrawMembership(userProfile.id);
+      setIsWithdrawalModalVisible(false);
+      handleLogout();
+    } catch (error) {
+      console.error("회원 탈퇴 중 오류 발생", error);
+    }
+  };
 
   useEffect(() => {
-    // 매치 생성 이벤트 리스너 등록
     const listener = () => {
       loadParticipations();
     };
     matchEventEmitter.addListener("matchCreated", listener);
 
-    // 컴포넌트 언마운트 시 리스너 제거
     return () => {
       matchEventEmitter.removeListener("matchCreated", listener);
     };
@@ -64,14 +85,26 @@ export const MyPageScreen = ({ navigation }: { navigation: any }) => {
         <View style={styles.profileContainer}>
           <View style={styles.profileHeader}>
             <View style={styles.imageContainer}>
-              <TouchableOpacity style={styles.editButton}>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => setIsEditModalVisible(true)}
+              >
                 <Edit2 color={colors.white} size={16} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.profileInfo}>
-              <Text style={styles.nickname}>{userProfile?.nickname}</Text>
-              <Text style={styles.email}>{userProfile?.email}</Text>
+              <View style={styles.row}>
+                <View>
+                  <Text style={styles.nickname}>{userProfile?.nickname}</Text>
+                  <Text style={styles.email}>{userProfile?.email}</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setIsOptionsModalVisible(true)}
+                >
+                  <MoreVertical color={colors.white} size={24} />
+                </TouchableOpacity>
+              </View>
 
               <View style={styles.badges}>
                 <View style={styles.badge}>
@@ -80,35 +113,33 @@ export const MyPageScreen = ({ navigation }: { navigation: any }) => {
                   </Text>
                 </View>
               </View>
-
-              <View style={styles.buttonGrid}>
-                <TouchableOpacity
-                  style={styles.editProfileButton}
-                  onPress={() => setIsEditModalVisible(true)}
-                >
-                  <Text style={styles.editProfileButtonText}>프로필 수정</Text>
-                </TouchableOpacity>
-
-                <EditProfileModal
-                  isVisible={isEditModalVisible}
-                  onClose={() => setIsEditModalVisible(false)}
-                  currentProfile={userProfile} // userProfile을 그대로 전달
-                  onUpdate={fetchProfile}
-                />
-
-                <TouchableOpacity
-                  style={styles.logoutButton}
-                  onPress={handleLogout}
-                >
-                  <Text style={styles.logoutButtonText}>로그아웃</Text>
-                </TouchableOpacity>
-              </View>
             </View>
           </View>
+
+          <OptionsModal
+            isVisible={isOptionsModalVisible}
+            onClose={() => setIsOptionsModalVisible(false)}
+            onEditProfile={() => setIsEditModalVisible(true)}
+            onLogout={handleLogout}
+            onWithdrawal={() => setIsWithdrawalModalVisible(true)}
+          />
 
           {userProfile && (
             <ProfileDetails profile={userProfile} isLoading={isLoading} />
           )}
+
+          <EditProfileModal
+            isVisible={isEditModalVisible}
+            onClose={() => setIsEditModalVisible(false)}
+            currentProfile={userProfile}
+            onUpdate={fetchProfile}
+          />
+
+          <WithdrawalModal
+            isVisible={isWithdrawalModalVisible}
+            onClose={() => setIsWithdrawalModalVisible(false)}
+            onConfirm={handleWithdrawal}
+          />
         </View>
         <ParticipationList
           participations={participations}
@@ -158,11 +189,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 16,
   },
-  profileImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 48,
-  },
   editButton: {
     position: "absolute",
     bottom: 0,
@@ -198,34 +224,8 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 12,
   },
-  editProfileButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignSelf: "flex-start",
-  },
-  editProfileButtonText: {
-    color: colors.white,
-    fontWeight: "bold",
-  },
-  logoutButton: {
-    backgroundColor: colors.grey.dark,
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.grey.medium,
-  },
-  logoutButtonText: {
-    color: colors.white,
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  buttonGrid: {
+  row: {
     flexDirection: "row",
-    marginTop: 10,
     justifyContent: "space-between",
   },
 });

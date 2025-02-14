@@ -11,7 +11,6 @@ import axiosInstance from "../../api/axios-interceptor";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../types/navigation";
-import SuccessModal from "../../components/common/SuccessModal";
 import { handleLogin } from "../../utils/auth/handleLogin";
 
 // 회원가입 1단계에서 입력 정보 타입
@@ -120,7 +119,6 @@ const SignupScreen = () => {
             onSubmit={handleSignupComplete}
           />
         )}
-        {/* <SuccessModal visible={showSuccessModal} onClose={handleModalClose} /> */}
         <LoginLink />
       </View>
     </SafeAreaView>
