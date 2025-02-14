@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../types/navigation";
 import { handleLogin } from "../../utils/auth/handleLogin";
+import { LoginSuccessModal } from "../../components/auth/login/LoginSuccessModal";
 
 // 회원가입 1단계에서 입력 정보 타입
 type TStep1Data = {
@@ -67,10 +68,6 @@ const SignupScreen = () => {
           password: data.password,
           navigation,
           axiosInstance,
-          defaultRoute: {
-            name: "MainTab",
-            params: { screen: "Guide" },
-          },
           onError: (message) => {
             console.error("자동 로그인 실패:", message);
             // 로그인 실패 시 처리
@@ -121,6 +118,11 @@ const SignupScreen = () => {
         )}
         <LoginLink />
       </View>
+
+      <LoginSuccessModal
+        visible={showSuccessModal}
+        onClose={handleModalClose}
+      />
     </SafeAreaView>
   );
 };

@@ -21,7 +21,6 @@ interface LoginResponse {
   accessToken: string;
   refreshToken: string;
 }
-
 export const handleLogin = async ({
   email,
   password,
@@ -47,15 +46,16 @@ export const handleLogin = async ({
         ["rememberLogin", rememberLogin ? "true" : "false"],
       ]);
 
-      // 잠시 대기하여 AsyncStorage가 완전히 저장되도록 함
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      onSuccess?.();
+      if (!onSuccess) {
+        navigation.reset({
+          index: 0,
+          routes: [defaultRoute],
+        });
+      }
 
-      navigation.reset({
-        index: 0,
-        routes: [defaultRoute],
-      });
+      onSuccess?.();
 
       return true;
     } else {
