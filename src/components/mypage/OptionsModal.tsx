@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "../../styles/colors";
+import NotificationSettingsModal from "../notification/NotificationSettingsModal";
 
 type TOptionsModal = {
   isVisible: boolean;
@@ -17,59 +18,83 @@ const OptionsModal = ({
   onLogout,
   onWithdrawal,
 }: TOptionsModal) => {
+  const [showNotificationSettings, setShowNotificationSettings] =
+    useState(false);
+
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={isVisible}
-      onRequestClose={onClose}
-    >
-      <TouchableOpacity
-        style={styles.modalOverlay}
-        activeOpacity={1}
-        onPress={onClose}
+    <>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isVisible}
+        onRequestClose={onClose}
       >
-        <View style={styles.modalContainer}>
-          <TouchableOpacity
-            style={styles.optionButton}
-            onPress={() => {
-              onEditProfile();
-              onClose();
-            }}
-          >
-            <Text style={[styles.optionText, styles.editProfileText]}>
-              프로필 수정
-            </Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={onClose}
+        >
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={() => {
+                setShowNotificationSettings(true);
+                onClose();
+              }}
+            >
+              <Text style={[styles.optionText, styles.editProfileText]}>
+                알림 설정
+              </Text>
+            </TouchableOpacity>
 
-          <View style={styles.divider} />
+            <View style={styles.divider} />
 
-          <TouchableOpacity
-            style={styles.optionButton}
-            onPress={() => {
-              onLogout();
-              onClose();
-            }}
-          >
-            <Text style={styles.optionText}>로그아웃</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={() => {
+                onEditProfile();
+                onClose();
+              }}
+            >
+              <Text style={[styles.optionText, styles.editProfileText]}>
+                프로필 수정
+              </Text>
+            </TouchableOpacity>
 
-          <View style={styles.divider} />
+            <View style={styles.divider} />
 
-          <TouchableOpacity
-            style={styles.optionButton}
-            onPress={() => {
-              onWithdrawal();
-              onClose();
-            }}
-          >
-            <Text style={[styles.optionText, styles.withdrawalText]}>
-              회원 탈퇴
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
-    </Modal>
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={() => {
+                onLogout();
+                onClose();
+              }}
+            >
+              <Text style={styles.optionText}>로그아웃</Text>
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={() => {
+                onWithdrawal();
+                onClose();
+              }}
+            >
+              <Text style={[styles.optionText, styles.withdrawalText]}>
+                회원 탈퇴
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <NotificationSettingsModal
+        isVisible={showNotificationSettings}
+        onClose={() => setShowNotificationSettings(false)}
+      />
+    </>
   );
 };
 

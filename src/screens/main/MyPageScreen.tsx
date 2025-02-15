@@ -21,6 +21,7 @@ import { matchEventEmitter } from "../../utils/event";
 import WithdrawalModal from "../../components/mypage/WithdrawalModal";
 import OptionsModal from "../../components/mypage/OptionsModal";
 import { withdrawMembership } from "../../api/member";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const MyPageScreen = ({ navigation }: { navigation: any }) => {
   const handleLogout = useLogout();
@@ -36,18 +37,21 @@ export const MyPageScreen = ({ navigation }: { navigation: any }) => {
     useState(false);
   const [isOptionsModalVisible, setIsOptionsModalVisible] = useState(false);
 
-  //회원탈퇴핸들러
   const handleWithdrawal = async () => {
-    // 가드 클로즈: 조건 불만족시 빠른 반환
     if (!userProfile?.id) {
       alert("사용자 정보를 찾을 수 없습니다.");
       return;
     }
 
-    // 메인 로직
     try {
       await withdrawMembership(userProfile.id);
       setIsWithdrawalModalVisible(false);
+
+      await AsyncStorage.multiRemove([
+        "pushPermissionShown",
+        "notificationSettings",
+      ]);
+
       handleLogout();
     } catch (error) {
       console.error("회원 탈퇴 중 오류 발생", error);

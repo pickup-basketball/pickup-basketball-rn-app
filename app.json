@@ -23,6 +23,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c699f65f-7872-4d69-80aa-26f9a8b02e21"
+      }
+    },
+    "owner": "zossba"
   }
 }
