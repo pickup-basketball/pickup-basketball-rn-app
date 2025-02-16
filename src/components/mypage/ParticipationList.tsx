@@ -1,5 +1,5 @@
 // components/match/ParticipationList.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import {
   Calendar,
@@ -31,6 +31,12 @@ const ParticipationList = ({
   const [selectedMatchParticipations, setSelectedMatchParticipations] =
     useState<ParticipationDetail[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [localParticipations, setLocalParticipations] =
+    useState(participations);
+
+  useEffect(() => {
+    setLocalParticipations(participations);
+  }, [participations]);
 
   const handleEditMatch = (matchData: any) => {
     navigation.navigate("EditMatch", {
@@ -99,7 +105,6 @@ const ParticipationList = ({
     handleParticipationStatus(participationDetail, "REJECTED");
 
   const handleDelete = async (matchId: number) => {
-    console.log("matchId", matchId);
     try {
       Alert.alert("매치 삭제", "정말로 이 매치를 삭제하시겠습니까?", [
         {
@@ -114,22 +119,19 @@ const ParticipationList = ({
               const response = await axiosInstance.delete(
                 `/matches/${matchId}`
               );
-              if (response.status === 200) {
+              if (response.status === 200 || response.status === 204) {
+                // 서버 요청 성공 시 로컬 상태 업데이트
+                setLocalParticipations((prev) =>
+                  prev.filter((item) => item.match.id !== matchId)
+                );
                 Alert.alert("성공", "매치가 삭제되었습니다");
-                onUpdate?.(); // 목록 새로고침
+                // 부모 컴포넌트에 변경 알림
+                onUpdate?.();
               }
             } catch (error) {
-              if (axios.isAxiosError(error)) {
-                console.error("Error details:", {
-                  status: error.response?.status,
-                  statusText: error.response?.statusText,
-                  data: error.response?.data,
-                });
-                const errorMessage =
-                  error.response?.data?.message ||
-                  "매치 삭제 중 오류가 발생했습니다";
-                Alert.alert("오류", errorMessage);
-              }
+              // 실패 시 원상 복구 로직 추가 가능
+              setLocalParticipations(participations);
+              Alert.alert("오류", "매치 삭제 중 오류가 발생했습니다");
             }
           },
         },

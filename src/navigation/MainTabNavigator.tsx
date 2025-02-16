@@ -80,6 +80,7 @@ const MypageStackNavigator = () => {
 export const MainTabNavigator = () => {
   return (
     <Tab.Navigator
+      initialRouteName="Guide"
       screenOptions={{
         tabBarStyle: { display: "none" },
       }}
