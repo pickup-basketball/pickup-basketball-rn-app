@@ -24,6 +24,7 @@ import { formatLevel, getLevelStyle } from "../../utils/formatters";
 import axiosInstance from "../../api/axios-interceptor";
 import ParticipationModal from "../../components/match/ParticipationModal";
 import { useMatchJoin } from "../../utils/hooks/useMatchJoin";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const MatchingScreen = () => {
   const navigation = useNavigation<WriteScreenNavigationProp>();
@@ -32,6 +33,7 @@ export const MatchingScreen = () => {
   const [locationFilter, setLocationFilter] = useState("all");
   const [levelFilter, setLevelFilter] = useState<Level | "all">("all");
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const {
     isJoinModalVisible,
     selectedMatchForJoin,
@@ -39,10 +41,11 @@ export const MatchingScreen = () => {
     handleCloseJoinModal,
   } = useMatchJoin();
 
+  console.log("matches", JSON.stringify(matches, null, 2));
+
   const fetchMatches = async () => {
     try {
       const response = await axiosInstance.get("/matches");
-      // console.log("매칭 정보2:", JSON.stringify(response, null, 2));
       if (
         response.data?.matchResponses &&
         Array.isArray(response.data.matchResponses)
@@ -62,14 +65,25 @@ export const MatchingScreen = () => {
     fetchMatches();
   }, []);
 
-  // 필터링된 매치 목록을 반환하는 함수
+  useEffect(() => {
+    const getCurrentUserId = async () => {
+      try {
+        const userId = await AsyncStorage.getItem("userId");
+        console.log("Raw userId from AsyncStorage:", userId);
+        setCurrentUserId(userId ? Number(userId) : null);
+        console.log("Converted currentUserId:", userId ? Number(userId) : null);
+      } catch (error) {
+        console.error("Error getting user ID:", error);
+      }
+    };
+    getCurrentUserId();
+  }, []);
+
   const getFilteredMatches = () => {
     return matches.filter((match) => {
-      // 지역 필터
       if (locationFilter !== "all" && match.location !== locationFilter) {
         return false;
       }
-      // 레벨 필터
       if (levelFilter !== "all" && match.level !== levelFilter) {
         return false;
       }
@@ -77,68 +91,82 @@ export const MatchingScreen = () => {
     });
   };
 
-  const renderMatchItem = ({ item }: { item: Post }) => (
-    <TouchableOpacity
-      style={styles.matchCard}
-      onPress={() => setSelectedMatch(item)}
-    >
-      <View style={styles.matchHeader}>
-        <Text style={styles.matchTitle}>{item.title}</Text>
-        <View style={styles.levelBadge}>
-          <Text
-            style={[styles.levelText, { color: getLevelStyle(item.level) }]}
-          >
-            {formatLevel(item.level)}
-          </Text>
-        </View>
-      </View>
+  const renderMatchItem = ({ item }: { item: Post }) => {
+    console.log(
+      "Comparing currentUserId:",
+      currentUserId,
+      "with hostId:",
+      item.hostId
+    );
 
-      <View style={styles.matchInfo}>
-        <View style={styles.infoRow}>
-          <MapPin size={16} color={colors.primary} />
-          <Text style={styles.locationText}>{item.location}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Calendar size={16} color={colors.primary} />
-          <Text style={styles.infoText}>{item.date}</Text>
-          <Clock size={16} color={colors.primary} />
-          <Text style={styles.infoText}>{item.time}</Text>
-          <Users size={16} color={colors.primary} />
-          <Text style={styles.infoText}>
-            {item.currentPlayers}/{item.maxPlayers}명
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.matchFooter}>
-        <Text style={styles.costText}>
-          {item.cost === 0 ? "무료" : `${item.cost.toLocaleString()}원`}
-        </Text>
-        {item.status === "OPEN" ? (
-          <TouchableOpacity
-            style={styles.joinButton}
-            onPress={() => {
-              handleJoin(item);
-            }}
-          >
-            <GradientWithBox
-              text="참여하기"
-              style={{
-                alignSelf: "flex-end",
-                width: "100%",
-                paddingHorizontal: 30,
-                paddingVertical: 10,
-              }}
-            />
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.closedButton}>
-            <Text style={styles.closedButtonText}>마감</Text>
+    return (
+      <TouchableOpacity
+        style={styles.matchCard}
+        onPress={() => setSelectedMatch(item)}
+      >
+        <View style={styles.matchHeader}>
+          <Text style={styles.matchTitle}>{item.title}</Text>
+          <View style={styles.levelBadge}>
+            <Text
+              style={[styles.levelText, { color: getLevelStyle(item.level) }]}
+            >
+              {formatLevel(item.level)}
+            </Text>
           </View>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+        </View>
+
+        <View style={styles.matchInfo}>
+          <View style={styles.infoRow}>
+            <MapPin size={16} color={colors.primary} />
+            <Text style={styles.locationText}>{item.location}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Calendar size={16} color={colors.primary} />
+            <Text style={styles.infoText}>{item.date}</Text>
+            <Clock size={16} color={colors.primary} />
+            <Text style={styles.infoText}>{item.time}</Text>
+            <Users size={16} color={colors.primary} />
+            <Text style={styles.infoText}>
+              {item.currentPlayers}/{item.maxPlayers}명
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.matchFooter}>
+          <Text style={styles.costText}>
+            {item.cost === 0 ? "무료" : `${item.cost.toLocaleString()}원`}
+          </Text>
+          {currentUserId === item.hostId ? (
+            <View style={styles.myMatchBadge}>
+              <Text style={styles.myMatchText}>나의 매칭</Text>
+            </View>
+          ) : item.status === "OPEN" ? (
+            <TouchableOpacity
+              style={styles.joinButton}
+              onPress={() => {
+                handleJoin(item);
+              }}
+            >
+              <GradientWithBox
+                text="참여하기"
+                style={{
+                  alignSelf: "flex-end",
+                  width: "100%",
+                  paddingHorizontal: 30,
+                  paddingVertical: 10,
+                }}
+              />
+            </TouchableOpacity>
+          ) : (
+            // 마감된 경우
+            <View style={styles.closedButton}>
+              <Text style={styles.closedButtonText}>마감</Text>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -311,5 +339,17 @@ const styles = StyleSheet.create({
   emptyText: {
     color: colors.grey.medium,
     fontSize: 16,
+  },
+  myMatchBadge: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 8,
+    opacity: 0.8,
+  },
+  myMatchText: {
+    color: colors.white,
+    fontWeight: "bold",
+    fontSize: 14,
   },
 });

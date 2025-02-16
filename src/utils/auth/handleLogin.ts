@@ -10,16 +10,13 @@ interface LoginParams {
   axiosInstance: AxiosInstance;
   onError?: (message: string) => void;
   onSuccess?: () => void;
-  defaultRoute?: {
-    name: string;
-    params?: Record<string, any>;
-  };
 }
 
 interface LoginResponse {
   jti: string;
   accessToken: string;
   refreshToken: string;
+  userId: string;
 }
 export const handleLogin = async ({
   email,
@@ -28,7 +25,6 @@ export const handleLogin = async ({
   axiosInstance,
   onError,
   onSuccess,
-  defaultRoute = { name: "MainTab", params: { screen: "guide" } },
 }: LoginParams): Promise<boolean> => {
   try {
     const response = await axiosInstance.post<LoginResponse>("/auth/login", {
@@ -37,23 +33,21 @@ export const handleLogin = async ({
     });
 
     if (response.data?.accessToken) {
+      console.log("response", JSON.stringify(response, null, 2));
       await AsyncStorage.multiSet([
         ["jti", response.data.jti],
         ["accessToken", response.data.accessToken],
         ["refreshToken", response.data.refreshToken],
         ["isLoggedIn", "true"],
+        ["userId", response.data.userId.toString()],
       ]);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      if (!onSuccess) {
-        navigation.reset({
-          index: 0,
-          routes: [defaultRoute],
-        });
-      }
-
       onSuccess?.();
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "MainTab" }],
+      });
 
       return true;
     } else {
