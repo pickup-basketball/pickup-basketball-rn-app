@@ -25,6 +25,8 @@ import axiosInstance from "../../api/axios-interceptor";
 import ParticipationModal from "../../components/match/ParticipationModal";
 import { useMatchJoin } from "../../utils/hooks/useMatchJoin";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { decodeToken } from "../../utils/auth/decodeToken";
+import { getCurrentUserId } from "../../utils/auth";
 
 export const MatchingScreen = () => {
   const navigation = useNavigation<WriteScreenNavigationProp>();
@@ -42,6 +44,15 @@ export const MatchingScreen = () => {
   } = useMatchJoin();
 
   console.log("matches", JSON.stringify(matches, null, 2));
+
+  useEffect(() => {
+    const initializeUserId = async () => {
+      const userId = await getCurrentUserId();
+      setCurrentUserId(userId);
+    };
+
+    initializeUserId();
+  }, []);
 
   const fetchMatches = async () => {
     try {
@@ -63,20 +74,6 @@ export const MatchingScreen = () => {
 
   useEffect(() => {
     fetchMatches();
-  }, []);
-
-  useEffect(() => {
-    const getCurrentUserId = async () => {
-      try {
-        const userId = await AsyncStorage.getItem("userId");
-        console.log("Raw userId from AsyncStorage:", userId);
-        setCurrentUserId(userId ? Number(userId) : null);
-        console.log("Converted currentUserId:", userId ? Number(userId) : null);
-      } catch (error) {
-        console.error("Error getting user ID:", error);
-      }
-    };
-    getCurrentUserId();
   }, []);
 
   const getFilteredMatches = () => {
@@ -342,14 +339,14 @@ const styles = StyleSheet.create({
   },
   myMatchBadge: {
     backgroundColor: colors.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingHorizontal: 30,
+    paddingVertical: 10,
     borderRadius: 8,
     opacity: 0.8,
   },
   myMatchText: {
     color: colors.white,
     fontWeight: "bold",
-    fontSize: 14,
+    fontSize: 16,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   View,
@@ -24,6 +24,7 @@ import { formatLevel, getLevelColor } from "../../utils/formatters";
 import { GradientWithBox } from "../common/Gradient";
 import { useMatchJoin } from "../../utils/hooks/useMatchJoin";
 import ParticipationModal from "./ParticipationModal";
+import { getCurrentUserId } from "../../utils/auth";
 
 type TMatchDetailModalProps = {
   match: Post;
@@ -42,6 +43,18 @@ export const MatchDetailModal = ({
     handleJoin,
     handleCloseJoinModal,
   } = useMatchJoin();
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const initializeUserId = async () => {
+      const userId = await getCurrentUserId();
+      setCurrentUserId(userId);
+    };
+
+    initializeUserId();
+  }, []);
+
+  const isMyMatch = currentUserId === match.hostId;
 
   const ProgressBar = ({ current, max }: { current: number; max: number }) => (
     <View style={styles.progressContainer}>
@@ -183,19 +196,25 @@ export const MatchDetailModal = ({
               <TouchableOpacity style={styles.shareButton}>
                 <Share2 size={20} color={colors.white} />
               </TouchableOpacity>
-              <TouchableOpacity
-                disabled={match.status === "CLOSED"}
-                onPress={() => handleJoin(match)}
-              >
-                <GradientWithBox
-                  text={match.status === "CLOSED" ? "마감됨" : "참여하기"}
-                  style={{
-                    width: "100%",
-                    opacity: match.status === "CLOSED" ? 0.5 : 1,
-                    paddingHorizontal: 30,
-                  }}
-                />
-              </TouchableOpacity>
+              {isMyMatch ? (
+                <View style={styles.myMatchBadge}>
+                  <Text style={styles.myMatchText}>나의 매칭</Text>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  disabled={match.status === "CLOSED"}
+                  onPress={() => handleJoin(match)}
+                >
+                  <GradientWithBox
+                    text={match.status === "CLOSED" ? "마감됨" : "참여하기"}
+                    style={{
+                      width: "100%",
+                      opacity: match.status === "CLOSED" ? 0.5 : 1,
+                      paddingHorizontal: 30,
+                    }}
+                  />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
@@ -459,5 +478,17 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 16,
     fontWeight: "600",
+  },
+  myMatchBadge: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+    borderRadius: 8,
+    opacity: 0.8,
+  },
+  myMatchText: {
+    color: colors.white,
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
