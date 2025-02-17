@@ -25,7 +25,6 @@ const LoginForm = () => {
     await handleLogin({
       email,
       password,
-      rememberLogin,
       navigation,
       axiosInstance,
       onError: setError,
