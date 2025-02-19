@@ -17,18 +17,18 @@ export const FilterSection = ({
   setLevelFilter,
   matches,
 }: TFilterSectionProps) => {
-  // 위치 필터
   const locations: Array<{ label: string; value: string }> = [
     { label: "전체 지역", value: "all" },
-    ...Array.from(new Set(matches.map((match) => match.location))).map(
-      (location) => ({
-        label: location.replace("서울시 ", ""),
+    ...Array.from(new Set(matches.map((match) => match.location)))
+      .filter(Boolean)
+      .map((location) => ({
+        label: location.includes("서울시 ")
+          ? location.replace("서울시 ", "")
+          : location,
         value: location,
-      })
-    ),
+      })),
   ];
 
-  // 레벨 필터
   const levelMapping: Record<Level, string> = {
     BEGINNER: "초급",
     INTERMEDIATE: "중급",

@@ -2,7 +2,8 @@ export type TFormData = {
   title: string;
   description: string;
   courtName: string;
-  location: string;
+  district: string;
+  locationDetail: string;
   date: string;
   time: string;
   level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
