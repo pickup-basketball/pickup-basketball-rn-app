@@ -55,8 +55,8 @@ const CourtsScreen = () => {
     try {
       const response = await axiosInstance.get("/courts");
       console.log("서버 응답:", response.data); // 실제 데이터 구조 확인
-      if (response.data?.data && Array.isArray(response.data.data)) {
-        setCourts(response.data.data);
+      if (Array.isArray(response.data)) {
+        setCourts(response.data);
       }
     } catch (error) {
       console.error("코트 데이터 조회 실패:", error);
@@ -68,6 +68,25 @@ const CourtsScreen = () => {
   useEffect(() => {
     fetchCourts();
   }, []);
+
+  const courtImages: { [key: string]: number } = {
+    "/boramae_1.jpg": require("../../../assets/courts/boramae_1.jpg"),
+    "/children_park_1.jpg": require("../../../assets/courts/children_park_1.jpg"),
+    "/dream_forest.jpg": require("../../../assets/courts/dream_forest.jpg"),
+    "/hangang_1.jpg": require("../../../assets/courts/hangang_1.jpg"),
+    "/hangang_2.jpg": require("../../../assets/courts/hangang_2.jpg"),
+    "/noeul_1.jpg": require("../../../assets/courts/noeul_1.jpg"),
+    "/noeul_2.jpg": require("../../../assets/courts/noeul_2.jpg"),
+    "/olympic_park_1.jpg": require("../../../assets/courts/olympic_park_1.jpg"),
+    "/olympic_park_3.jpg": require("../../../assets/courts/olympic_park_3.jpg"),
+    "/olympic_park_2.jpg": require("../../../assets/courts/olympic_park_2.jpg"),
+    "/sangam_1.jpg": require("../../../assets/courts/sangam_1.jpg"),
+    "/sangam_2.jpg": require("../../../assets/courts/sangam_2.jpg"),
+    "/seoul_forest_1.jpg": require("../../../assets/courts/seoul_forest_1.jpg"),
+    "/seoul_forest_2.jpg": require("../../../assets/courts/seoul_forest_2.jpg"),
+    "/yongsan_1.jpg": require("../../../assets/courts/yongsan_1.jpg"),
+    "/yongsan_2.jpg": require("../../../assets/courts/yongsan_2.jpg"),
+  };
 
   const locations = useMemo(() => {
     return ["전체", ...new Set(courts.map((court) => court.location))];
@@ -99,7 +118,14 @@ const CourtsScreen = () => {
       onPress={() => setSelectedCourt(court)}
     >
       <View style={styles.imageContainer}>
-        <Image source={{ uri: court.images?.[0] }} style={styles.courtImage} />
+        <Image
+          source={
+            court.images?.[0] && courtImages[court.images[0]]
+              ? courtImages[court.images[0]]
+              : require("../../../assets/icon.png")
+          }
+          style={styles.courtImage}
+        />
         <View style={styles.hoopsBadge}>
           <Text style={styles.hoopsText}>{court.hoops}개 링</Text>
         </View>
