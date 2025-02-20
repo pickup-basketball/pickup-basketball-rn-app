@@ -1,8 +1,9 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, View, TouchableOpacity, Text, Modal } from "react-native";
 import { colors } from "../../../styles/colors";
 import { ErrorMessage, RequiredLabel } from "../../common/form/FormElements";
-import { TextInput } from "react-native-gesture-handler";
+import { TextInput, ScrollView } from "react-native-gesture-handler";
+import axiosInstance from "../../../api/axios-interceptor";
 
 type LocationInputsProps = {
   courtName: string;
@@ -20,7 +21,6 @@ type LocationInputsProps = {
   onFocus: (field: string) => void;
   onBlur: () => void;
 };
-
 export const LocationInputs = ({
   courtName,
   district,
@@ -32,46 +32,63 @@ export const LocationInputs = ({
   focusedInput,
   onFocus,
   onBlur,
-}: LocationInputsProps) => (
-  <View>
-    <View style={styles.inputContainer}>
-      <RequiredLabel text="코트 이름" />
-      <TextInput
-        style={[
-          styles.input,
-          focusedInput === "courtName" && styles.inputFocused,
-          errors.courtName && styles.inputError,
-        ]}
-        value={courtName}
-        onChangeText={onCourtNameChange}
-        placeholder="예) 올림픽공원 농구장"
-        placeholderTextColor="#666"
-        onFocus={() => onFocus("courtName")}
-        onBlur={onBlur}
-      />
-      {errors.courtName && <ErrorMessage error={errors.courtName} />}
-    </View>
+}: LocationInputsProps) => {
+  const [districts, setDistricts] = useState<string[]>([]);
+  const [showDistrictModal, setShowDistrictModal] = useState(false);
 
-    <View style={styles.row}>
-      <View style={styles.halfInput}>
-        <RequiredLabel text="지역" />
-        <TextInput
-          style={[
-            styles.input,
-            focusedInput === "district" && styles.inputFocused,
-            errors.district && styles.inputError,
-          ]}
-          value={district}
-          onChangeText={onDistrictChange}
-          placeholder="예) 서울 송파구"
-          placeholderTextColor="#666"
-          onFocus={() => onFocus("district")}
-          onBlur={onBlur}
-        />
-        {errors.district && <ErrorMessage error={errors.district} />}
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      try {
+        const response = await axiosInstance.get("/matches/districts");
+        setDistricts(response.data);
+      } catch (error) {
+        console.error("Failed to fetch districts:", error);
+      }
+    };
+
+    fetchDistricts();
+  }, []);
+
+  return (
+    <View style={styles.inputContainer}>
+      <View style={styles.row}>
+        <View style={styles.districtInput}>
+          <RequiredLabel text="지역" />
+          <TouchableOpacity
+            style={[
+              styles.input,
+              styles.selectButton,
+              errors.district && styles.inputError,
+            ]}
+            onPress={() => setShowDistrictModal(true)}
+          >
+            <Text style={styles.selectButtonText}>
+              {district || "지역을 선택하세요"}
+            </Text>
+          </TouchableOpacity>
+          {errors.district && <ErrorMessage error={errors.district} />}
+        </View>
+
+        <View style={styles.courtNameInput}>
+          <RequiredLabel text="코트 이름" />
+          <TextInput
+            style={[
+              styles.input,
+              focusedInput === "courtName" && styles.inputFocused,
+              errors.courtName && styles.inputError,
+            ]}
+            value={courtName}
+            onChangeText={onCourtNameChange}
+            placeholder="예) 올림픽공원 농구장"
+            placeholderTextColor="#666"
+            onFocus={() => onFocus("courtName")}
+            onBlur={onBlur}
+          />
+          {errors.courtName && <ErrorMessage error={errors.courtName} />}
+        </View>
       </View>
 
-      <View style={styles.halfInput}>
+      <View style={styles.detailInput}>
         <RequiredLabel text="상세 위치" />
         <TextInput
           style={[
@@ -90,9 +107,41 @@ export const LocationInputs = ({
           <ErrorMessage error={errors.locationDetail} />
         )}
       </View>
+
+      <Modal
+        visible={showDistrictModal}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>지역 선택</Text>
+            <ScrollView style={styles.districtList}>
+              {districts.map((item) => (
+                <TouchableOpacity
+                  key={item}
+                  style={styles.districtItem}
+                  onPress={() => {
+                    onDistrictChange(item);
+                    setShowDistrictModal(false);
+                  }}
+                >
+                  <Text style={styles.districtItemText}>{item}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowDistrictModal(false)}
+            >
+              <Text style={styles.closeButtonText}>닫기</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   inputContainer: {
@@ -100,12 +149,17 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
-    justifyContent: "space-between",
     marginBottom: 24,
     gap: 16,
   },
-  halfInput: {
-    flex: 1,
+  districtInput: {
+    flex: 2,
+  },
+  courtNameInput: {
+    flex: 3,
+  },
+  detailInput: {
+    width: "100%",
   },
   input: {
     backgroundColor: "rgba(39, 39, 42, 0.5)",
@@ -122,5 +176,56 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: "#EF4444",
+  },
+  selectButton: {
+    justifyContent: "center",
+  },
+  selectButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#18181B",
+    borderRadius: 12,
+    padding: 20,
+    width: "80%",
+    maxHeight: "80%",
+  },
+  modalTitle: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  districtList: {
+    maxHeight: 300,
+  },
+  districtItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#3F3F46",
+  },
+  districtItemText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+  },
+  closeButton: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  closeButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
