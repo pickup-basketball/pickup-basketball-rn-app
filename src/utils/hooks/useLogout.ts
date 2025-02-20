@@ -8,10 +8,12 @@ export const useLogout = () => {
   const handleLogout = async () => {
     try {
       await AsyncStorage.multiRemove([
+        "jti",
         "isLoggedIn",
         "rememberLogin",
         "accessToken",
         "refreshToken",
+        "userId",
       ]);
 
       navigation.reset({

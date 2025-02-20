@@ -10,24 +10,19 @@ const axiosInstance = axios.create({
   },
 });
 
-const refreshTokenRequest = axios.create({
-  baseURL: "http://13.125.58.70:8080",
-  timeout: 5000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
 // Request Interceptor
 axiosInstance.interceptors.request.use(
   async (config) => {
-    // 로그인, 회원가입 요청일 경우 토큰 체크를 하지 않음
-    if (config.url === "/auth/login" || config.url === "/auth/signup") {
+    // 로그인, 회원가입, 토큰 리프레시 요청은 제외
+    if (
+      config.url === "/auth/login" ||
+      config.url === "/auth/signup" ||
+      config.url === "/auth/refresh"
+    ) {
       return config;
     }
 
     const token = await AsyncStorage.getItem("accessToken");
-    // 토큰 없으면 Login으로 이동시킴
     if (!token) {
       console.warn("No access token found. Redirecting to login.");
       navigate("Login");
@@ -41,9 +36,7 @@ axiosInstance.interceptors.request.use(
 
 // Response Interceptor
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
@@ -52,26 +45,32 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // refreshToken으로 새 accessToken 발급
+        // refreshToken을 body에 담아 새 토큰 요청
         const refreshToken = await AsyncStorage.getItem("refreshToken");
-        const response = await refreshTokenRequest.post("/auth/refresh", {
-          refreshToken: refreshToken,
-        });
+        const response = await axios.post(
+          "http://13.125.58.70:8080/auth/refresh",
+          { refreshToken } // refreshToken을 body에 담아 전송
+        );
 
-        const newAccessToken = response.data.accessToken;
-        await AsyncStorage.setItem("accessToken", newAccessToken);
+        // 새 토큰 저장
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        await AsyncStorage.multiSet([
+          ["accessToken", accessToken],
+          ["refreshToken", newRefreshToken],
+        ]);
 
         // 새 토큰으로 원래 요청 재시도
-        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         // refresh token도 만료된 경우
         await AsyncStorage.multiRemove([
+          "jti",
           "accessToken",
           "refreshToken",
           "isLoggedIn",
         ]);
-        // 로그인 화면으로 이동하는 로직은 App.tsx의 isLoggedIn 상태 변화로 처리됨
+        navigate("Login");
         return Promise.reject(refreshError);
       }
     }
