@@ -40,7 +40,10 @@ export const LocationInputs = ({
     const fetchDistricts = async () => {
       try {
         const response = await axiosInstance.get("/matches/districts");
-        setDistricts(response.data);
+        const formattedDistricts = response.data.map(
+          (district: string) => `서울특별시 ${district}`
+        );
+        setDistricts(formattedDistricts);
       } catch (error) {
         console.error("Failed to fetch districts:", error);
       }
@@ -48,6 +51,10 @@ export const LocationInputs = ({
 
     fetchDistricts();
   }, []);
+
+  const getDisplayDistrict = (fullDistrict: string) => {
+    return fullDistrict.replace("서울특별시 ", "");
+  };
 
   return (
     <View style={styles.inputContainer}>
@@ -63,7 +70,7 @@ export const LocationInputs = ({
             onPress={() => setShowDistrictModal(true)}
           >
             <Text style={styles.selectButtonText}>
-              {district || "지역을 선택하세요"}
+              {district ? getDisplayDistrict(district) : "지역을 선택하세요"}
             </Text>
           </TouchableOpacity>
           {errors.district && <ErrorMessage error={errors.district} />}
@@ -126,7 +133,9 @@ export const LocationInputs = ({
                     setShowDistrictModal(false);
                   }}
                 >
-                  <Text style={styles.districtItemText}>{item}</Text>
+                  <Text style={styles.districtItemText}>
+                    {getDisplayDistrict(item)}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>

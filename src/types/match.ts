@@ -4,18 +4,21 @@ export type Status = "OPEN" | "CLOSED";
 export type Post = {
   id: number;
   title: string;
+  description: string;
   courtName: string;
-  location: string;
+  district: string;
+  locationDetail: string;
   date: string;
   time: string;
   level: Level;
   currentPlayers: number;
   maxPlayers: number;
   cost: number;
-  status: Status;
-  description: string;
-  rules?: string;
+  rules: string;
   hostId: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type TPosition = {
