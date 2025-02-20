@@ -24,8 +24,6 @@ import { formatLevel, getLevelStyle } from "../../utils/formatters";
 import axiosInstance from "../../api/axios-interceptor";
 import ParticipationModal from "../../components/match/ParticipationModal";
 import { useMatchJoin } from "../../utils/hooks/useMatchJoin";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { decodeToken } from "../../utils/auth/decodeToken";
 import { getCurrentUserId } from "../../utils/auth";
 
 export const MatchingScreen = () => {
@@ -36,6 +34,9 @@ export const MatchingScreen = () => {
   const [levelFilter, setLevelFilter] = useState<Level | "all">("all");
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const {
     isJoinModalVisible,
     selectedMatchForJoin,
@@ -45,6 +46,13 @@ export const MatchingScreen = () => {
 
   console.log("matches", JSON.stringify(matches, null, 2));
 
+  const loadMoreMatches = async () => {
+    if (isLoadingMore || currentPage >= totalPages - 1) return;
+
+    setIsLoadingMore(true);
+    await fetchMatches(currentPage + 1, true);
+  };
+
   useEffect(() => {
     const initializeUserId = async () => {
       const userId = await getCurrentUserId();
@@ -53,40 +61,46 @@ export const MatchingScreen = () => {
 
     initializeUserId();
   }, []);
-
-  const fetchMatches = async () => {
+  const fetchMatches = async (
+    page: number = 0,
+    isLoadingMore: boolean = false
+  ) => {
     try {
-      const response = await axiosInstance.get("/matches");
+      setLoading(!isLoadingMore);
+      const response = await axiosInstance.get("/matches", {
+        params: {
+          page,
+          size: 10,
+          district: locationFilter !== "all" ? locationFilter : undefined,
+          level: levelFilter !== "all" ? levelFilter : undefined,
+        },
+      });
+
       if (
         response.data?.matchResponses &&
         Array.isArray(response.data.matchResponses)
       ) {
-        setMatches(response.data.matchResponses);
-      } else {
-        setMatches([]);
+        setMatches((prev) =>
+          isLoadingMore
+            ? [...prev, ...response.data.matchResponses]
+            : response.data.matchResponses
+        );
+        setTotalPages(response.data.totalPages);
+        setCurrentPage(page);
       }
     } catch (error) {
-      setMatches([]);
+      console.error("Error fetching matches:", error);
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
   useEffect(() => {
-    fetchMatches();
-  }, []);
-
-  const getFilteredMatches = () => {
-    return matches.filter((match) => {
-      if (locationFilter !== "all" && match.location !== locationFilter) {
-        return false;
-      }
-      if (levelFilter !== "all" && match.level !== levelFilter) {
-        return false;
-      }
-      return true;
-    });
-  };
+    setMatches([]);
+    setCurrentPage(0);
+    fetchMatches(0);
+  }, [locationFilter, levelFilter]);
 
   const renderMatchItem = ({ item }: { item: Post }) => {
     console.log(
@@ -115,7 +129,9 @@ export const MatchingScreen = () => {
         <View style={styles.matchInfo}>
           <View style={styles.infoRow}>
             <MapPin size={16} color={colors.primary} />
-            <Text style={styles.locationText}>{item.location}</Text>
+            <Text style={styles.locationText}>
+              {`${item.courtName} (${item.district})`}
+            </Text>
           </View>
           <View style={styles.infoRow}>
             <Calendar size={16} color={colors.primary} />
@@ -193,15 +209,35 @@ export const MatchingScreen = () => {
         setLevelFilter={setLevelFilter}
         matches={matches}
       />
-      <ScrollView style={styles.listContainer}>
-        {loading ? (
+      <ScrollView
+        style={styles.listContainer}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          const isCloseToBottom =
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - 20;
+
+          if (isCloseToBottom && !loading && !isLoadingMore) {
+            loadMoreMatches();
+          }
+        }}
+        scrollEventThrottle={400}
+      >
+        {loading && currentPage === 0 ? (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>로딩 중...</Text>
           </View>
-        ) : Array.isArray(matches) && matches.length > 0 ? (
-          getFilteredMatches().map((match) => (
-            <View key={match.id}>{renderMatchItem({ item: match })}</View>
-          ))
+        ) : matches.length > 0 ? (
+          <>
+            {matches.map((match) => (
+              <View key={match.id}>{renderMatchItem({ item: match })}</View>
+            ))}
+            {isLoadingMore && (
+              <View style={styles.loadingMoreContainer}>
+                <Text style={styles.loadingText}>더 불러오는 중...</Text>
+              </View>
+            )}
+          </>
         ) : (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>매치가 없습니다.</Text>
@@ -234,8 +270,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 20,
-    paddingLeft: 20,
-    paddingRight: 20,
+    paddingHorizontal: 20,
     paddingBottom: 10,
   },
   headerTitle: {
@@ -293,8 +328,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     color: colors.white,
-    marginLeft: 10,
-    marginRight: 10,
+    marginHorizontal: 10,
   },
   matchFooter: {
     flexDirection: "row",
@@ -348,5 +382,9 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontWeight: "bold",
     fontSize: 16,
+  },
+  loadingMoreContainer: {
+    padding: 20,
+    alignItems: "center",
   },
 });
