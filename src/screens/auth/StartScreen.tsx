@@ -9,8 +9,13 @@ import {
   Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { UserPlus } from "lucide-react-native";
 import type { TNavigationProp } from "../../types/navigation";
+import {
+  Design1,
+  Design2,
+  Design3,
+  Design4,
+} from "../../components/landing/LandingElement";
 
 const { width } = Dimensions.get("window");
 
@@ -25,28 +30,26 @@ const StartScreen = () => {
     const page = Math.round(event.nativeEvent.contentOffset.x / width);
     setCurrentPage(page);
   };
-  const Design1 = () => (
-    <>
-      <UserPlus color="#FF8800" size={100} />
-      <View style={styles.userTypeList}>
-        <Text style={styles.userType}>Point Guard [PG]</Text>
-        <Text style={styles.userType}>Shooting Guard [SG]</Text>
-        <Text style={styles.selectedUserType}>Small Forward [SF]</Text>
-        <Text style={styles.userType}>Power Forward [PF]</Text>
-        <Text style={styles.userType}>Center [C]</Text>
-      </View>
-    </>
-  );
 
   const PageContent = ({ index }: { index: number }) => (
     <View style={[styles.page, { width }]}>
-      <View style={styles.ContentContainer}>{index === 0 && <Design1 />}</View>
+      <View style={styles.ContentContainer}>
+        {index === 0 && <Design1 />}
+        {index === 1 && <Design2 />}
+        {index === 2 && <Design3 />}
+        {index === 3 && <Design4 />}
+      </View>
 
       <View style={styles.bottomContentContainer}>
         <View style={styles.advancedContainer}>
-          <Text style={styles.advancedText}>프로필 만들기</Text>
+          <Text style={styles.advancedText}>
+            {index === 0 && "프로필 만들기"}
+            {index === 1 && "메이트 찾기"}
+            {index === 2 && "매치 만들기"}
+            {index === 3 && "코트 찾기"}
+          </Text>
           <View style={styles.badgeContainer}>
-            {[0, 1, 2, 3, 4].map((dotIndex) => (
+            {[0, 1, 2, 3].map((dotIndex) => (
               <View
                 key={dotIndex}
                 style={[
@@ -69,7 +72,7 @@ const StartScreen = () => {
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleScroll}
       >
-        {[0, 1, 2, 3, 4].map((index) => (
+        {[0, 1, 2, 3].map((index) => (
           <PageContent key={index} index={index} />
         ))}
       </ScrollView>
@@ -124,7 +127,7 @@ const styles = StyleSheet.create({
   },
   advancedText: {
     color: "#FF8800",
-    fontSize: 16,
+    fontSize: 20,
   },
   badgeContainer: {
     flexDirection: "row",
