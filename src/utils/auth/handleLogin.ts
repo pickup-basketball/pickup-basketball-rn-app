@@ -10,6 +10,7 @@ interface LoginParams {
   axiosInstance: AxiosInstance;
   onError?: (message: string) => void;
   onSuccess?: () => void;
+  shouldNavigate?: boolean;
 }
 
 interface LoginResponse {
@@ -24,6 +25,7 @@ export const handleLogin = async ({
   axiosInstance,
   onError,
   onSuccess,
+  shouldNavigate = true,
 }: LoginParams): Promise<boolean> => {
   try {
     const response = await axiosInstance.post<LoginResponse>("/auth/login", {
@@ -44,10 +46,13 @@ export const handleLogin = async ({
       ]);
 
       onSuccess?.();
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "MainTab" }],
-      });
+
+      if (shouldNavigate) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "MainTab" }],
+        });
+      }
 
       return true;
     } else {

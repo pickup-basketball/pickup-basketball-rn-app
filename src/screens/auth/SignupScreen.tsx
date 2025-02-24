@@ -14,7 +14,6 @@ import { RootStackParamList } from "../../types/navigation";
 import { handleLogin } from "../../utils/auth/handleLogin";
 import { LoginSuccessModal } from "../../components/auth/login/LoginSuccessModal";
 
-// 회원가입 1단계에서 입력 정보 타입
 type TStep1Data = {
   email: string;
   password: string;
@@ -46,7 +45,6 @@ const SignupScreen = () => {
 
       const response = await axiosInstance.post("/member", payload);
 
-      // 회원가입 성공
       if (response.status === 201 || response.status === 200) {
         return { success: true };
       }
@@ -68,14 +66,17 @@ const SignupScreen = () => {
           password: data.password,
           navigation,
           axiosInstance,
+          shouldNavigate: false,
           onError: (message) => {
             console.error("자동 로그인 실패:", message);
-            // 로그인 실패 시 처리
             Alert.alert(
               "로그인 오류",
               "회원가입은 완료되었으나 자동 로그인에 실패했습니다. 다시 로그인해주세요."
             );
-            navigation.navigate("Login");
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Login" }],
+            });
           },
           onSuccess: () => {
             setShowSuccessModal(true);
@@ -83,7 +84,6 @@ const SignupScreen = () => {
         });
 
         if (!loginResult) {
-          // 로그인 실패 시 로그인 화면으로 이동
           navigation.navigate("Login");
         }
       }
