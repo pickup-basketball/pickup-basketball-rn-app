@@ -22,11 +22,15 @@ export default function App() {
           "isLoggedIn",
           "accessToken",
         ]);
-
         if (loginStatus[1] === "true" && token[1]) {
           setIsLoggedIn(true);
         } else {
-          await AsyncStorage.multiRemove(["isLoggedIn", "accessToken"]);
+          await AsyncStorage.multiRemove([
+            "isLoggedIn",
+            "accessToken",
+            "refreshToken",
+            "jti",
+          ]);
           setIsLoggedIn(false);
         }
       } catch (error) {

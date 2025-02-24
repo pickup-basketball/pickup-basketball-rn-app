@@ -22,8 +22,13 @@ import WithdrawalModal from "../../components/mypage/WithdrawalModal";
 import OptionsModal from "../../components/mypage/OptionsModal";
 import { withdrawMembership } from "../../api/member";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MyPageNavigationProp } from "../../types/navigation";
 
-export const MyPageScreen = ({ navigation }: { navigation: any }) => {
+export const MyPageScreen = ({
+  navigation,
+}: {
+  navigation: MyPageNavigationProp;
+}) => {
   const handleLogout = useLogout();
   const {
     userProfile,
@@ -58,6 +63,26 @@ export const MyPageScreen = ({ navigation }: { navigation: any }) => {
     }
   };
 
+  useEffect(() => {
+    const checkAuthAndFetchProfile = async () => {
+      try {
+        const token = await AsyncStorage.getItem("accessToken");
+        if (!token) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "Start" }],
+          });
+          return;
+        }
+
+        await fetchProfile();
+      } catch (error) {
+        console.error("프로필 조회 실패:", error);
+      }
+    };
+
+    checkAuthAndFetchProfile();
+  }, [fetchProfile, navigation]);
   useEffect(() => {
     const listener = () => {
       loadParticipations();

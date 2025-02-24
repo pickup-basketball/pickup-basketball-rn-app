@@ -1,6 +1,7 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Participation } from "./participation";
+import { CompositeNavigationProp } from "@react-navigation/native";
 
 export type RootStackParamList = {
   Start: undefined;
@@ -43,7 +44,10 @@ export type MyPageStackParamList = {
   };
 };
 
-type MyPageNavigationProp = StackNavigationProp<MyPageStackParamList>;
+export type MyPageNavigationProp = CompositeNavigationProp<
+  StackNavigationProp<RootStackParamList, "Start">,
+  StackNavigationProp<MyPageStackParamList>
+>;
 
 export type ParticipationListProps = {
   participations: Participation[];
