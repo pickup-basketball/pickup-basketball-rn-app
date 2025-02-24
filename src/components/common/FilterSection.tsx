@@ -1,3 +1,4 @@
+import React from "react";
 import { View, StyleSheet } from "react-native";
 import { FilterPicker } from "./FilterPicker";
 import { Level, Post } from "../../types/match";
@@ -17,16 +18,18 @@ export const FilterSection = ({
   setLevelFilter,
   matches,
 }: TFilterSectionProps) => {
+  const uniqueDistricts = Array.from(
+    new Set(matches.map((match) => match.district))
+  ).filter(Boolean);
+
   const locations: Array<{ label: string; value: string }> = [
     { label: "전체 지역", value: "all" },
-    ...Array.from(new Set(matches.map((match) => match.location)))
-      .filter(Boolean)
-      .map((location) => ({
-        label: location.includes("서울시 ")
-          ? location.replace("서울시 ", "")
-          : location,
-        value: location,
-      })),
+    ...uniqueDistricts.map((district) => ({
+      label: district.includes("서울특별시 ")
+        ? district.replace("서울특별시 ", "")
+        : district,
+      value: district,
+    })),
   ];
 
   const levelMapping: Record<Level, string> = {
@@ -35,14 +38,16 @@ export const FilterSection = ({
     ADVANCED: "상급",
   };
 
+  const uniqueLevels = Array.from(
+    new Set(matches.map((match) => match.level))
+  ).filter(Boolean) as Level[];
+
   const levels: Array<{ label: string; value: Level | "all" }> = [
     { label: "전체 레벨", value: "all" },
-    ...Array.from(new Set(matches.map((match) => match.level))).map(
-      (level) => ({
-        label: levelMapping[level as Level],
-        value: level as Level,
-      })
-    ),
+    ...uniqueLevels.map((level) => ({
+      label: levelMapping[level] || level,
+      value: level,
+    })),
   ];
 
   return (
