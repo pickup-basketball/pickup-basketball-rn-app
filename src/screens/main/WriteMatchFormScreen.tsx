@@ -106,10 +106,16 @@ const WriteMatchForm = ({ navigation }: Props) => {
         <PlayersCostInputs
           maxPlayers={formData.maxPlayers}
           cost={formData.cost}
-          onMaxPlayersChange={(text) =>
-            updateFormData("maxPlayers", parseInt(text) || 6)
-          }
-          onCostChange={(text) => updateFormData("cost", parseInt(text) || 0)}
+          onMaxPlayersChange={(text) => {
+            // 빈 문자열이면 undefined 또는 null로, 값이 있으면 숫자로 변환
+            const value = text === "" ? null : parseInt(text);
+            updateFormData("maxPlayers", value);
+          }}
+          onCostChange={(text) => {
+            // 빈 문자열이면 undefined 또는 null로, 값이 있으면 숫자로 변환
+            const value = text === "" ? null : parseInt(text);
+            updateFormData("cost", value);
+          }}
           errors={{
             maxPlayers: errors.maxPlayers,
             cost: errors.cost,

@@ -1,4 +1,3 @@
-// screens/match/index.tsx
 import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
@@ -28,8 +27,9 @@ import { getCurrentUserId } from "../../utils/auth";
 
 export const MatchingScreen = () => {
   const navigation = useNavigation<WriteScreenNavigationProp>();
-  const [matches, setMatches] = useState<Post[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<Post | null>(null);
+  const [allMatches, setAllMatches] = useState<Post[]>([]);
+  const [filteredMatches, setFilteredMatches] = useState<Post[]>([]);
   const [locationFilter, setLocationFilter] = useState("all");
   const [levelFilter, setLevelFilter] = useState<Level | "all">("all");
   const [loading, setLoading] = useState(true);
@@ -43,8 +43,6 @@ export const MatchingScreen = () => {
     handleJoin,
     handleCloseJoinModal,
   } = useMatchJoin();
-
-  console.log("matches", JSON.stringify(matches, null, 2));
 
   const loadMoreMatches = async () => {
     if (isLoadingMore || currentPage >= totalPages - 1) return;
@@ -61,6 +59,7 @@ export const MatchingScreen = () => {
 
     initializeUserId();
   }, []);
+
   const fetchMatches = async (
     page: number = 0,
     isLoadingMore: boolean = false
@@ -71,8 +70,6 @@ export const MatchingScreen = () => {
         params: {
           page,
           size: 10,
-          district: locationFilter !== "all" ? locationFilter : undefined,
-          level: levelFilter !== "all" ? levelFilter : undefined,
         },
       });
 
@@ -80,11 +77,14 @@ export const MatchingScreen = () => {
         response.data?.matchResponses &&
         Array.isArray(response.data.matchResponses)
       ) {
-        setMatches((prev) =>
-          isLoadingMore
-            ? [...prev, ...response.data.matchResponses]
-            : response.data.matchResponses
-        );
+        const newMatches = isLoadingMore
+          ? [...allMatches, ...response.data.matchResponses]
+          : response.data.matchResponses;
+
+        setAllMatches(newMatches);
+        // 필터링 적용
+        applyFilters(newMatches);
+
         setTotalPages(response.data.totalPages);
         setCurrentPage(page);
       }
@@ -96,20 +96,41 @@ export const MatchingScreen = () => {
     }
   };
 
+  const applyFilters = (matches: Post[]) => {
+    let result = [...matches];
+
+    // 지역 필터 적용
+    if (locationFilter !== "all") {
+      // 서울특별시, 서울시 등을 제거하고 구 이름만으로 비교
+      const locationName = locationFilter.replace(/서울특별시\s|서울시\s/, "");
+      result = result.filter((match) => {
+        const districtName = match.district.replace(
+          /서울특별시\s|서울시\s/,
+          ""
+        );
+        return (
+          districtName.includes(locationName) ||
+          locationName.includes(districtName)
+        );
+      });
+    }
+
+    if (levelFilter !== "all") {
+      result = result.filter((match) => match.level === levelFilter);
+    }
+
+    setFilteredMatches(result);
+  };
+
   useEffect(() => {
-    setMatches([]);
-    setCurrentPage(0);
-    fetchMatches(0);
+    applyFilters(allMatches);
   }, [locationFilter, levelFilter]);
 
-  const renderMatchItem = ({ item }: { item: Post }) => {
-    console.log(
-      "Comparing currentUserId:",
-      currentUserId,
-      "with hostId:",
-      item.hostId
-    );
+  useEffect(() => {
+    fetchMatches(0);
+  }, []);
 
+  const renderMatchItem = ({ item }: { item: Post }) => {
     return (
       <TouchableOpacity
         style={styles.matchCard}
@@ -171,7 +192,6 @@ export const MatchingScreen = () => {
               />
             </TouchableOpacity>
           ) : (
-            // 마감된 경우
             <View style={styles.closedButton}>
               <Text style={styles.closedButtonText}>마감</Text>
             </View>
@@ -207,7 +227,7 @@ export const MatchingScreen = () => {
         levelFilter={levelFilter}
         setLocationFilter={setLocationFilter}
         setLevelFilter={setLevelFilter}
-        matches={matches}
+        matches={allMatches}
       />
       <ScrollView
         style={styles.listContainer}
@@ -227,9 +247,9 @@ export const MatchingScreen = () => {
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>로딩 중...</Text>
           </View>
-        ) : matches.length > 0 ? (
+        ) : filteredMatches.length > 0 ? (
           <>
-            {matches.map((match) => (
+            {filteredMatches.map((match) => (
               <View key={match.id}>{renderMatchItem({ item: match })}</View>
             ))}
             {isLoadingMore && (

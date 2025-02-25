@@ -37,7 +37,7 @@ export const PlayersCostInputs = ({
           focusedInput === "maxPlayers" && styles.inputFocused,
           errors.maxPlayers && styles.inputError,
         ]}
-        value={String(maxPlayers)}
+        value={maxPlayers ? String(maxPlayers) : ""}
         onChangeText={onMaxPlayersChange}
         keyboardType="numeric"
         placeholder="2~20명"
@@ -55,7 +55,7 @@ export const PlayersCostInputs = ({
           focusedInput === "cost" && styles.inputFocused,
           errors.cost && styles.inputError,
         ]}
-        value={String(cost)}
+        value={cost ? String(cost) : ""}
         onChangeText={onCostChange}
         keyboardType="numeric"
         placeholder="0원 이상"

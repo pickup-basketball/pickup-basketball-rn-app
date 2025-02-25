@@ -11,7 +11,7 @@ export const useMatchForm = () => {
     date: "",
     time: "",
     level: "BEGINNER",
-    maxPlayers: 6,
+    maxPlayers: 0,
     cost: 0,
     rules: [""],
   });
