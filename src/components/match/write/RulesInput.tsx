@@ -227,7 +227,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  // 새로 추가된 스타일
   fieldError: {
     color: "#EF4444",
     fontSize: 12,

@@ -70,7 +70,7 @@ export const LocationInputs = ({
             onPress={() => setShowDistrictModal(true)}
           >
             <Text style={styles.selectButtonText}>
-              {district ? getDisplayDistrict(district) : "지역을 선택하세요"}
+              {district ? getDisplayDistrict(district) : "지역 선택"}
             </Text>
           </TouchableOpacity>
           {errors.district && <ErrorMessage error={errors.district} />}

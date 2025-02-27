@@ -37,7 +37,7 @@ export const PlayersCostInputs = ({
           focusedInput === "maxPlayers" && styles.inputFocused,
           errors.maxPlayers && styles.inputError,
         ]}
-        value={maxPlayers ? String(maxPlayers) : ""}
+        value={String(maxPlayers)}
         onChangeText={onMaxPlayersChange}
         keyboardType="numeric"
         placeholder="2~20명"
@@ -48,14 +48,14 @@ export const PlayersCostInputs = ({
       {errors.maxPlayers && <ErrorMessage error={errors.maxPlayers} />}
     </View>
     <View style={styles.halfInput}>
-      <Text style={styles.label}>참가비</Text>
+      <RequiredLabel text="참가비" />
       <TextInput
         style={[
           styles.input,
           focusedInput === "cost" && styles.inputFocused,
           errors.cost && styles.inputError,
         ]}
-        value={cost ? String(cost) : ""}
+        value={String(cost)}
         onChangeText={onCostChange}
         keyboardType="numeric"
         placeholder="0원 이상"
@@ -227,7 +227,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  // 새로 추가된 스타일
   fieldError: {
     color: "#EF4444",
     fontSize: 12,

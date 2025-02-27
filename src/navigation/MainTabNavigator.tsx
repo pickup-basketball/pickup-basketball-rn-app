@@ -5,8 +5,8 @@ import GuideScreen from "../screens/main/GuideScreen";
 import { MatchingScreen } from "../screens/main/MatchingScreen";
 import { MyPageScreen } from "../screens/main/MyPageScreen";
 import WriteMatchForm from "../screens/main/WriteMatchFormScreen";
-import { EditMatchScreen } from "../components/match/EditMatchScreen";
 import { MyPageStackParamList } from "../types/navigation";
+import EditMatchScreen from "../components/match/EditMatchScreen";
 
 // 스택 네비게이터 생성
 const GuideStack = createStackNavigator();

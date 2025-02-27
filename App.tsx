@@ -16,31 +16,13 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    fetch("http://13.125.58.70/", { method: "GET" })
-      .then((r) => console.log("80 포트 성공:", r))
-      .catch((e) => console.log("80 포트 실패:", e));
-  }, []);
-
-  useEffect(() => {
-    fetch("https://13.125.58.70:8080/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: "test1234@gmail.com",
-        password: "test1234@",
-      }),
-    })
-      .then((r) => console.log("HTTPS 성공:", r))
-      .catch((e) => console.log("HTTPS 실패:", e));
-  }, []);
-
-  useEffect(() => {
     const checkLoginStatus = async () => {
       try {
         const [loginStatus, token] = await AsyncStorage.multiGet([
           "isLoggedIn",
           "accessToken",
         ]);
+        console.log("accessToken:", token);
         if (loginStatus[1] === "true" && token[1]) {
           setIsLoggedIn(true);
         } else {

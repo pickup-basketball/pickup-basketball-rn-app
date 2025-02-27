@@ -102,6 +102,21 @@ export const MyPageScreen = ({
     fetchProfile();
   }, [fetchProfile]);
 
+  useEffect(() => {
+    const listener = () => {
+      loadParticipations();
+    };
+
+    // 두 이벤트 모두 리스닝
+    matchEventEmitter.addListener("matchCreated", listener);
+    matchEventEmitter.addListener("matchUpdated", listener);
+
+    return () => {
+      matchEventEmitter.removeListener("matchCreated", listener);
+      matchEventEmitter.removeListener("matchUpdated", listener);
+    };
+  }, [loadParticipations]);
+
   return (
     <SafeAreaView style={styles.container}>
       <LoggedInHeader />
