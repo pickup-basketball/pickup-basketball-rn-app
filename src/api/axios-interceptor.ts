@@ -82,7 +82,7 @@ axiosInstance.interceptors.response.use(
         );
 
         const response = await refreshAxios.post("/auth/refresh", null, {
-          headers: { refreshToken },
+          headers: { "Refresh-Token": refreshToken },
         });
 
         console.log("✅ 토큰 갱신 성공:", {
