@@ -24,10 +24,8 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="myapp"/>
-        <data android:scheme="com.zossba.newPickup"/>
-        <data android:scheme="exp+newpickup"/>
         <data android:scheme="com.zossba.pickup"/>
+        <data android:scheme="exp+pickup"/>
       </intent-filter>
     </activity>
   </application>
