@@ -18,11 +18,13 @@ export default function App() {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const [loginStatus, token] = await AsyncStorage.multiGet([
+        const [loginStatus, token, refresh] = await AsyncStorage.multiGet([
           "isLoggedIn",
           "accessToken",
+          "refresh",
         ]);
         console.log("accessToken:", token);
+        console.log("refreshToken:", refresh);
         if (loginStatus[1] === "true" && token[1]) {
           setIsLoggedIn(true);
         } else {
