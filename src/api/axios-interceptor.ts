@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { navigate, navigationRef } from "../navigation/NavigationService";
 import { Alert } from "react-native";
 import { CommonActions } from "@react-navigation/native";
+import { authEventEmitter } from "../utils/event";
 
 const axiosInstance = axios.create({
   baseURL: "http://13.125.58.70:8080",
@@ -15,6 +16,9 @@ const axiosInstance = axios.create({
 const refreshAxios = axios.create({
   baseURL: "http://13.125.58.70:8080",
   timeout: 5000,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 // 모든 요청에 디버깅 추가
@@ -67,41 +71,63 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
 
     if (
-      error.response?.status === 500 &&
-      error.response?.data?.message?.includes("JWT expired") &&
-      !originalRequest._retry
+      (error.response?.status === 500 &&
+        error.response?.data?.message?.includes("JWT expired")) ||
+      error.response?.status === 401 // 401 Unauthorized도 처리
     ) {
       console.log("🔄 토큰 만료 감지: 토큰 갱신 시도...");
+      // 한 번만 재시도
+      if (originalRequest._retry) {
+        console.log("⚠️ 이미 재시도한 요청입니다. 로그아웃 처리합니다.");
+        authEventEmitter.emit(
+          "logout",
+          "세션이 만료되었습니다. 다시 로그인해주세요."
+        );
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
 
       try {
         const refreshToken = await AsyncStorage.getItem("refreshToken");
-        console.log(
-          "🔑 리프레시 토큰:",
-          refreshToken ? refreshToken.substring(0, 10) + "..." : "없음"
-        );
+        if (!refreshToken) {
+          console.error("❌ 리프레시 토큰 없음");
+          authEventEmitter.emit(
+            "logout",
+            "세션이 만료되었습니다. 다시 로그인해주세요."
+          );
+          return Promise.reject(error);
+        }
 
-        const response = await refreshAxios.post("/auth/refresh", null, {
-          headers: { "Refresh-Token": refreshToken },
+        console.log("🔑 리프레시 토큰:", refreshToken.substring(0, 10) + "...");
+
+        const refreshResponse = await refreshAxios.post("/auth/refresh", null, {
+          headers: {
+            "Refresh-Token": refreshToken,
+          },
         });
 
         console.log("✅ 토큰 갱신 성공:", {
-          newTokenLength: response.data.accessToken?.length,
-          refreshTokenLength: response.data.refreshToken?.length,
+          newTokenLength: refreshResponse.data.accessToken?.length,
+          refreshTokenLength: refreshResponse.data.refreshToken?.length,
         });
 
         const {
           accessToken,
           refreshToken: newRefreshToken,
           jti,
-        } = response.data;
-        await AsyncStorage.multiSet([
-          ["accessToken", accessToken],
-          ["refreshToken", newRefreshToken],
-          ["jti", jti],
-        ]);
+        } = refreshResponse.data;
+
+        // 새 토큰 저장
+        authEventEmitter.emit("login", {
+          accessToken,
+          refreshToken: newRefreshToken,
+          jti: jti || "",
+          shouldNavigate: false,
+        });
         console.log("💾 새 토큰 저장됨");
 
+        // 원래 요청 재시도
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         console.log("🔄 원래 요청 재시도:", originalRequest.url);
         return axiosInstance(originalRequest);
@@ -115,25 +141,11 @@ axiosInstance.interceptors.response.use(
           console.error("  - 일반 오류:", error);
         }
 
-        console.log("🚪 로그아웃 처리 중...");
-        await AsyncStorage.multiRemove([
-          "jti",
-          "accessToken",
-          "refreshToken",
-          "isLoggedIn",
-        ]);
-
-        navigationRef.current?.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: "Login" }],
-          })
+        authEventEmitter.emit(
+          "logout",
+          "세션이 만료되었습니다. 다시 로그인해주세요."
         );
 
-        Alert.alert(
-          "세션 만료",
-          "로그인이 만료되었습니다. 다시 로그인해주세요."
-        );
         return Promise.reject(error);
       }
     }

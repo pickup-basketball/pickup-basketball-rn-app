@@ -8,6 +8,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import StartScreen from "./src/screens/auth/StartScreen";
 import LoginScreen from "./src/screens/auth/LoginScreen";
 import SignupScreen from "./src/screens/auth/SignupScreen";
+import { useLogout } from "./src/utils/hooks/useLogout";
+import { Alert } from "react-native";
+import { authEventEmitter } from "./src/utils/event";
+import { setupAuthHandlers } from "./src/utils/auth/authHandlers";
+import { LogoutHandler } from "./src/components/common/LogoutHandler";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -16,16 +21,22 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    const cleanupHandlers = setupAuthHandlers();
+    return cleanupHandlers;
+  }, []);
+
+  useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const [loginStatus, token, refresh] = await AsyncStorage.multiGet([
-          "isLoggedIn",
-          "accessToken",
-          "refresh",
-        ]);
-        console.log("accessToken:", token);
-        console.log("refreshToken:", refresh);
-        if (loginStatus[1] === "true" && token[1]) {
+        const [loginStatus, accessToken, refreshToken] =
+          await AsyncStorage.multiGet([
+            "isLoggedIn",
+            "accessToken",
+            "refreshToken",
+          ]);
+        console.log("accessToken:", accessToken);
+        console.log("refreshToken:", refreshToken);
+        if (loginStatus[1] === "true" && accessToken[1]) {
           setIsLoggedIn(true);
         } else {
           await AsyncStorage.multiRemove([
@@ -53,6 +64,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
+      <LogoutHandler />
       <Stack.Navigator
         screenOptions={{ headerShown: false }}
         initialRouteName={isLoggedIn ? "MainTab" : "Start"}
