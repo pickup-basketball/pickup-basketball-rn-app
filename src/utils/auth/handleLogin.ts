@@ -2,6 +2,7 @@ import { NavigationProp } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AxiosError, AxiosInstance } from "axios";
 import { decodeToken } from "./decodeToken";
+import { authEventEmitter } from "../event";
 
 interface LoginParams {
   email: string;
@@ -34,25 +35,15 @@ export const handleLogin = async ({
     });
 
     if (response.data?.accessToken) {
-      const decodedToken = decodeToken(response.data.accessToken);
-      const userId = decodedToken?.userId;
-
-      await AsyncStorage.multiSet([
-        ["jti", response.data.jti],
-        ["accessToken", response.data.accessToken],
-        ["refreshToken", response.data.refreshToken],
-        ["isLoggedIn", "true"],
-        ["userId", userId?.toString() ?? ""],
-      ]);
-
-      onSuccess?.();
-
-      if (shouldNavigate) {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "MainTab" }],
-        });
-      }
+      // 로그인 이벤트 발생
+      authEventEmitter.emit("login", {
+        accessToken: response.data.accessToken,
+        refreshToken: response.data.refreshToken,
+        jti: response.data.jti,
+        navigation,
+        shouldNavigate,
+        callback: onSuccess,
+      });
 
       return true;
     } else {
