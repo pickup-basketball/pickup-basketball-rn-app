@@ -53,7 +53,13 @@ const WriteMatchForm = ({ navigation }: Props) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content}>
-        <Header navigation={navigation} />
+        <Header
+          title="매치 작성"
+          subtitle="새로운 매치 정보를 입력해주세요"
+          navigation={navigation}
+          backText="매칭"
+          onBack={() => navigation.goBack()}
+        />
 
         <TitleInput
           value={formData.title}
@@ -107,13 +113,13 @@ const WriteMatchForm = ({ navigation }: Props) => {
           maxPlayers={formData.maxPlayers}
           cost={formData.cost}
           onMaxPlayersChange={(text) => {
-            // 빈 문자열이면 undefined 또는 null로, 값이 있으면 숫자로 변환
-            const value = text === "" ? null : parseInt(text);
+            // 빈 문자열이면 0으로, 값이 있으면 숫자로 변환
+            const value = text === "" ? 0 : parseInt(text);
             updateFormData("maxPlayers", value);
           }}
           onCostChange={(text) => {
-            // 빈 문자열이면 undefined 또는 null로, 값이 있으면 숫자로 변환
-            const value = text === "" ? null : parseInt(text);
+            // 빈 문자열이면 0으로, 값이 있으면 숫자로 변환
+            const value = text === "" ? 0 : parseInt(text);
             updateFormData("cost", value);
           }}
           errors={{

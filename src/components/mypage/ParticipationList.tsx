@@ -21,6 +21,8 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../../types/navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { Level, Post } from "../../types/match";
+import { MatchDetailModal } from "../match/MatchDetailModal";
 
 const ParticipationList = ({
   participations,
@@ -33,6 +35,7 @@ const ParticipationList = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [localParticipations, setLocalParticipations] =
     useState(participations);
+  const [selectedMatch, setSelectedMatch] = useState<Post | null>(null);
 
   useEffect(() => {
     setLocalParticipations(participations);
@@ -187,6 +190,15 @@ const ParticipationList = ({
     </View>
   );
 
+  const convertMatchToPost = (match: any): Post => {
+    return {
+      ...match,
+      district: match.location || "",
+      locationDetail: "",
+      level: match.level as Level,
+    };
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>매치 현황</Text>
@@ -195,57 +207,68 @@ const ParticipationList = ({
         {participations.length ? (
           participations.map((item) => (
             <View key={item.match.id} style={styles.cardContainer}>
-              <View style={styles.card}>
-                <View style={styles.header}>
-                  <Text style={styles.title}>{item.match.title}</Text>
-                  <GradientText>
-                    <Text style={styles.statusText}>
-                      {item.match.status === "OPEN" ? "모집 중" : "마감"}
-                    </Text>
-                  </GradientText>
-                </View>
+              <TouchableOpacity
+                onPress={() => setSelectedMatch(convertMatchToPost(item.match))}
+              >
+                <View style={styles.card}>
+                  <View style={styles.header}>
+                    <Text style={styles.title}>{item.match.title}</Text>
+                    <GradientText>
+                      <Text style={styles.statusText}>
+                        {item.match.status === "OPEN" ? "모집 중" : "마감"}
+                      </Text>
+                    </GradientText>
+                  </View>
 
-                <View style={styles.infoRow}>
-                  <View style={styles.iconTextContainer}>
-                    <MapPin size={16} color={colors.grey.light} />
-                    <Text style={styles.infoText}>
-                      {item.match.courtName} · {item.match.location}
-                    </Text>
+                  <View style={styles.infoRow}>
+                    <View style={styles.iconTextContainer}>
+                      <MapPin size={16} color={colors.grey.light} />
+                      <Text style={styles.infoText}>
+                        {item.match.courtName} · {item.match.location}
+                      </Text>
+                    </View>
                   </View>
-                </View>
 
-                <View style={styles.infoRow}>
-                  <View style={styles.iconTextContainer}>
-                    <Calendar size={16} color={colors.grey.light} />
-                    <Text style={styles.infoText}>{item.match.date}</Text>
+                  <View style={styles.infoRow}>
+                    <View style={styles.iconTextContainer}>
+                      <Calendar size={16} color={colors.grey.light} />
+                      <Text style={styles.infoText}>{item.match.date}</Text>
+                    </View>
+                    <View style={styles.iconTextContainer}>
+                      <Clock size={16} color={colors.grey.light} />
+                      <Text style={styles.infoText}>{item.match.time}</Text>
+                    </View>
+                    <View style={styles.iconTextContainer}>
+                      <Users size={16} color={colors.grey.light} />
+                      <Text style={styles.infoText}>
+                        {item.match.currentPlayers}/{item.match.maxPlayers}명
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.iconTextContainer}>
-                    <Clock size={16} color={colors.grey.light} />
-                    <Text style={styles.infoText}>{item.match.time}</Text>
-                  </View>
-                  <View style={styles.iconTextContainer}>
-                    <Users size={16} color={colors.grey.light} />
-                    <Text style={styles.infoText}>
-                      {item.match.currentPlayers}/{item.match.maxPlayers}명
-                    </Text>
-                  </View>
-                </View>
 
-                <View style={styles.participationSection}>
-                  {item.participations.length > 0 && (
-                    <Text style={styles.participationCount}>
-                      참여 신청 {item.participations.length}건
-                    </Text>
-                  )}
-                  {renderActionButtons(item)}
+                  <View style={styles.participationSection}>
+                    {item.participations.length > 0 && (
+                      <Text style={styles.participationCount}>
+                        참여 신청 {item.participations.length}건
+                      </Text>
+                    )}
+                    {renderActionButtons(item)}
+                  </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             </View>
           ))
         ) : (
           <Text style={styles.infoText}>참여한 매치가 없습니다.</Text>
         )}
       </View>
+      {selectedMatch ? (
+        <MatchDetailModal
+          match={selectedMatch}
+          isOpen={true}
+          onClose={() => setSelectedMatch(null)}
+        />
+      ) : null}
       <ParticipationRequestModal
         isVisible={isModalVisible}
         onClose={handleCloseModal}

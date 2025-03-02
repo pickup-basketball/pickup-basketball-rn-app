@@ -81,21 +81,32 @@ export const MatchDetailModal = ({
   const rules = match.rules?.split(",") || [];
 
   return (
-    <Modal visible={isOpen} transparent animationType="fade">
+    <Modal
+      visible={isOpen}
+      transparent
+      animationType="fade"
+      statusBarTranslucent={true} // 안드로이드에서 상태바 영역까지 모달 확장
+    >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <X color={colors.white} size={24} />
           </TouchableOpacity>
 
-          <ScrollView style={styles.scrollContent}>
+          <ScrollView
+            style={styles.scrollContent}
+            contentContainerStyle={{ paddingBottom: 50 }}
+            showsVerticalScrollIndicator={true}
+          >
             <View style={styles.header}>
               <View>
                 <Text style={styles.title}>{match.title}</Text>
                 <Text style={styles.courtName}>{match.courtName}</Text>
                 <View style={styles.locationRow}>
                   <MapPin size={16} color={colors.primary} />
-                  <Text style={styles.location}>{match.location}</Text>
+                  <Text style={styles.location}>
+                    {`${match.district || ""} ${match.locationDetail || ""}`}
+                  </Text>
                 </View>
               </View>
               <View
@@ -260,6 +271,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 20,
     paddingTop: 60,
+    paddingBottom: 20,
+    flexGrow: 1,
   },
   header: {
     flexDirection: "row",

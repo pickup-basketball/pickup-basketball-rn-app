@@ -1,4 +1,3 @@
-// screens/MyPage.tsx
 import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
@@ -107,7 +106,6 @@ export const MyPageScreen = ({
       loadParticipations();
     };
 
-    // 두 이벤트 모두 리스닝
     matchEventEmitter.addListener("matchCreated", listener);
     matchEventEmitter.addListener("matchUpdated", listener);
 
