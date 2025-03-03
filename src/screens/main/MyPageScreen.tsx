@@ -63,7 +63,8 @@ export const MyPageScreen = ({
   };
 
   useEffect(() => {
-    const checkAuthAndFetchProfile = async () => {
+    // 초기 데이터 로드를 순차적으로 실행
+    const loadInitialData = async () => {
       try {
         const token = await AsyncStorage.getItem("accessToken");
         if (!token) {
@@ -74,46 +75,32 @@ export const MyPageScreen = ({
           return;
         }
 
-        await fetchProfile();
+        await fetchProfile(); // 먼저 프로필 데이터 로드
+        await loadParticipations(); // 프로필 로드 후 참여 데이터 로드
       } catch (error) {
-        console.error("프로필 조회 실패:", error);
+        console.error("데이터 로드 실패:", error);
       }
     };
 
-    checkAuthAndFetchProfile();
-  }, [fetchProfile, navigation]);
-  useEffect(() => {
-    const listener = () => {
-      loadParticipations();
-    };
-    matchEventEmitter.addListener("matchCreated", listener);
+    loadInitialData();
 
-    return () => {
-      matchEventEmitter.removeListener("matchCreated", listener);
-    };
-  }, []);
-
-  useEffect(() => {
-    loadParticipations();
-  }, [loadParticipations]);
-
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
-
-  useEffect(() => {
-    const listener = () => {
+    // 이벤트 리스너 등록 (한 번만)
+    const matchCreatedListener = () => {
       loadParticipations();
     };
 
-    matchEventEmitter.addListener("matchCreated", listener);
-    matchEventEmitter.addListener("matchUpdated", listener);
+    const matchUpdatedListener = () => {
+      loadParticipations();
+    };
+
+    matchEventEmitter.addListener("matchCreated", matchCreatedListener);
+    matchEventEmitter.addListener("matchUpdated", matchUpdatedListener);
 
     return () => {
-      matchEventEmitter.removeListener("matchCreated", listener);
-      matchEventEmitter.removeListener("matchUpdated", listener);
+      matchEventEmitter.removeListener("matchCreated", matchCreatedListener);
+      matchEventEmitter.removeListener("matchUpdated", matchUpdatedListener);
     };
-  }, [loadParticipations]);
+  }, [fetchProfile, loadParticipations, navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
