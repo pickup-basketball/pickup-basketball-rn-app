@@ -1,8 +1,6 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { navigate, navigationRef } from "../navigation/NavigationService";
-import { Alert } from "react-native";
-import { CommonActions } from "@react-navigation/native";
+import { navigate } from "../navigation/NavigationService";
 import { authEventEmitter } from "../utils/event";
 
 const axiosInstance = axios.create({
@@ -71,9 +69,10 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
 
     if (
-      (error.response?.status === 500 &&
-        error.response?.data?.message?.includes("JWT expired")) ||
-      error.response?.status === 401 // 401 Unauthorized도 처리
+      error.response?.status === 401 ||
+      (error.response?.status === 400 &&
+        error.response?.data?.message?.includes("토큰이 만료") &&
+        !originalRequest._retry)
     ) {
       console.log("🔄 토큰 만료 감지: 토큰 갱신 시도...");
       // 한 번만 재시도
@@ -101,7 +100,7 @@ axiosInstance.interceptors.response.use(
 
         console.log("🔑 리프레시 토큰:", refreshToken.substring(0, 10) + "...");
 
-        const refreshResponse = await refreshAxios.post("/auth/refresh", null, {
+        const refreshResponse = await refreshAxios.post("/auth/refresh", "", {
           headers: {
             "Refresh-Token": refreshToken,
           },
