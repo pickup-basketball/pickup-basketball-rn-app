@@ -15,15 +15,21 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.zossba.pickup"
+      "bundleIdentifier": "com.zossba.pickup",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.zossba.pickup"
+      "package": "com.zossba.pickup",
+      "googleServicesFile": "./google-services.json"
     },
+    "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging"
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     },

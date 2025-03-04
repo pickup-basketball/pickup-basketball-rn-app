@@ -1,9 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TNavigationProp } from "../../types/navigation";
+import FCMTokenManager from "./useFCMToken";
 
 export const useLogout = () => {
   const navigation = useNavigation<TNavigationProp>();
+  const { deleteFcmToken } = FCMTokenManager();
 
   const handleLogout = async () => {
     try {
@@ -15,6 +17,8 @@ export const useLogout = () => {
         "refreshToken",
         "userId",
       ]);
+
+      deleteFcmToken();
 
       navigation.reset({
         index: 0,

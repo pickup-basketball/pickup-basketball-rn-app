@@ -22,6 +22,8 @@ import OptionsModal from "../../components/mypage/OptionsModal";
 import { withdrawMembership } from "../../api/member";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MyPageNavigationProp } from "../../types/navigation";
+import PushPermissionModal from "../../components/permission/PushPermissionModal";
+import NotificationAlertBox from "../../components/notification/NotificationAlertBox";
 
 export const MyPageScreen = ({
   navigation,
@@ -106,6 +108,7 @@ export const MyPageScreen = ({
     <SafeAreaView style={styles.container}>
       <LoggedInHeader />
       <ScrollView nestedScrollEnabled>
+        <NotificationAlertBox />
         <View style={styles.header}>
           <Text style={styles.title}>마이페이지</Text>
           <Text style={styles.subtitle}>내 정보와 활동 내역을 관리하세요</Text>

@@ -8,17 +8,33 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import StartScreen from "./src/screens/auth/StartScreen";
 import LoginScreen from "./src/screens/auth/LoginScreen";
 import SignupScreen from "./src/screens/auth/SignupScreen";
-import { useLogout } from "./src/utils/hooks/useLogout";
-import { Alert } from "react-native";
-import { authEventEmitter } from "./src/utils/event";
 import { setupAuthHandlers } from "./src/utils/auth/authHandlers";
 import { LogoutHandler } from "./src/components/common/LogoutHandler";
+import FCMTokenManager from "./src/utils/hooks/useFCMToken";
+import { initializeApp, getApps, getApp } from "@react-native-firebase/app";
+
+// 앱 컴포넌트 외부에서 Firebase 초기화
+try {
+  if (getApps().length === 0) {
+    initializeApp({
+      appId: "placeholder-app-id",
+      apiKey: "placeholder-api-key",
+      projectId: "placeholder-project-id",
+    });
+    console.log("Firebase 초기화 성공");
+  } else {
+    console.log("Firebase 이미 초기화됨");
+  }
+} catch (error) {
+  console.error("Firebase 초기화 실패:", error);
+}
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { fcmToken, saveFcmTokenToServer } = FCMTokenManager();
 
   useEffect(() => {
     const cleanupHandlers = setupAuthHandlers();
@@ -38,6 +54,11 @@ export default function App() {
         console.log("refreshToken:", refreshToken);
         if (loginStatus[1] === "true" && accessToken[1]) {
           setIsLoggedIn(true);
+
+          // 로그인 상태일 때 FCM 토큰을 서버에 저장
+          if (fcmToken) {
+            await saveFcmTokenToServer(fcmToken);
+          }
         } else {
           await AsyncStorage.multiRemove([
             "isLoggedIn",
@@ -56,7 +77,7 @@ export default function App() {
     };
 
     checkLoginStatus();
-  }, []);
+  }, [fcmToken]);
 
   if (isLoading) {
     return null;
