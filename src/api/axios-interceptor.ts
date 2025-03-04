@@ -72,6 +72,9 @@ axiosInstance.interceptors.response.use(
       error.response?.status === 401 ||
       (error.response?.status === 400 &&
         error.response?.data?.message?.includes("토큰이 만료") &&
+        !originalRequest._retry) ||
+      (error.response?.status === 500 &&
+        error.response?.data?.message?.includes("JWT expired") &&
         !originalRequest._retry)
     ) {
       console.log("🔄 토큰 만료 감지: 토큰 갱신 시도...");
