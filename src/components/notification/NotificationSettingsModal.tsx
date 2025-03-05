@@ -12,9 +12,8 @@ import {
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { colors } from "../../styles/colors";
-import axiosInstance from "../../api/axios-interceptor";
-import { EXPO_PROJECT_ID } from "../../config/expo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import FCMTokenManager from "../../utils/hooks/useFCMToken";
 
 type TNotificationSettingsModal = {
   isVisible: boolean;
@@ -26,6 +25,8 @@ const NotificationSettingsModal = ({
   onClose,
 }: TNotificationSettingsModal) => {
   const [isEnabled, setIsEnabled] = useState(false);
+
+  const { fcmToken, saveFcmTokenToServer, deleteFcmToken } = FCMTokenManager();
 
   useEffect(() => {
     if (isVisible) {
@@ -42,17 +43,14 @@ const NotificationSettingsModal = ({
       const savedSettings = await AsyncStorage.getItem("notificationSettings");
       const savedEnabled = savedSettings === "true";
 
-      // 시스템 권한과 저장된 설정이 모두 허용일 때만 true
-      setIsEnabled(status === "granted" && savedEnabled);
+      // FCM 토큰이 있는지 확인하고 상태 설정
+      setIsEnabled(status === "granted" && savedEnabled && !!fcmToken);
     } catch (error) {
       console.error("알림 상태 확인 실패:", error);
     }
   };
 
-  // FCM 토큰 얻기
-  const registerForPushNotificationsAsync = async () => {
-    let token;
-
+  const requestNotificationPermission = async () => {
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("default", {
         name: "default",
@@ -74,88 +72,54 @@ const NotificationSettingsModal = ({
 
       if (finalStatus !== "granted") {
         Alert.alert("알림 권한 필요", "알림을 받으려면 권한이 필요합니다");
-        return null;
+        return false;
       }
-
-      // 실제 디바이스에서는 expo-notifications을 통해 FCM 토큰 얻기
-      let rawToken = (
-        await Notifications.getExpoPushTokenAsync({
-          projectId: EXPO_PROJECT_ID,
-        })
-      ).data;
-
-      // ExponentPushToken[xxx] 형식에서 xxx 부분만 추출
-      token = rawToken.replace("ExponentPushToken[", "").replace("]", "");
-      console.log("추출된 FCM 토큰:", token);
+      return true;
     } else {
-      // 에뮬레이터용 테스트 코드 - 개발 중에만 사용
-      console.log("에뮬레이터에서 테스트 중: 가짜 토큰 사용");
-      // 에뮬레이터에서는 임시 토큰 생성 (개발용)
-      const deviceId = `emulator-${Math.random()
-        .toString(36)
-        .substring(2, 15)}`;
-      token = deviceId; // 대괄호와 ExponentPushToken 접두사 제거
-      console.log("생성된 가짜 토큰:", token);
+      console.log("에뮬레이터에서는 알림 기능이 제한됩니다");
+      return true; // 에뮬레이터에서는 true 반환
     }
-
-    return token;
   };
 
   const toggleNotifications = async () => {
     try {
       if (!isEnabled) {
-        // 권한 요청 및 토큰 얻기
-        const token = await registerForPushNotificationsAsync();
-        if (!token) return;
+        // 권한 요청
+        const permissionGranted = await requestNotificationPermission();
+        if (!permissionGranted) return;
 
-        try {
-          // FCM 토큰 서버에 등록
-          await axiosInstance.post("/device", {
-            fcmToken: token,
-            deviceType: Platform.OS.toUpperCase(),
-            status: true, // status 필드 추가
-          });
-
+        // 시뮬레이터인 경우 가짜 토큰으로 처리
+        if (!Device.isDevice) {
+          console.log("시뮬레이터에서 알림 설정 테스트 모드 활성화");
           await AsyncStorage.setItem("notificationSettings", "true");
           setIsEnabled(true);
-        } catch (error: any) {
-          // 409 에러는 이미 토큰이 등록된 상태
-          if (error.response?.status === 409) {
-            await AsyncStorage.setItem("notificationSettings", "true");
-            setIsEnabled(true);
-          } else {
-            console.error(
-              "서버에 알림 토큰 등록 실패:",
-              error.response?.data || error
-            );
-            throw error;
-          }
+          return;
+        }
+
+        // 실제 기기에서의 처리
+        if (!fcmToken) {
+          console.log("FCM 토큰을 획득하는 중...");
+        }
+
+        if (fcmToken) {
+          await saveFcmTokenToServer(fcmToken);
+          await AsyncStorage.setItem("notificationSettings", "true");
+          setIsEnabled(true);
+        } else {
+          throw new Error("FCM 토큰을 획득할 수 없습니다");
         }
       } else {
-        // 토큰 얻기
-        const token = await registerForPushNotificationsAsync();
-        if (!token) return;
-
-        try {
-          // 서버에서 토큰 삭제
-          await axiosInstance.delete("/device", {
-            data: { fcmToken: token },
-          });
-
+        // 알림 비활성화
+        if (!Device.isDevice) {
+          console.log("시뮬레이터에서 알림 설정 테스트 모드 비활성화");
           await AsyncStorage.setItem("notificationSettings", "false");
           setIsEnabled(false);
-        } catch (error: any) {
-          if (error.response?.status === 404) {
-            await AsyncStorage.setItem("notificationSettings", "false");
-            setIsEnabled(false);
-          } else {
-            console.error(
-              "서버에서 알림 토큰 삭제 실패:",
-              error.response?.data || error
-            );
-            throw error;
-          }
+          return;
         }
+
+        await deleteFcmToken();
+        await AsyncStorage.setItem("notificationSettings", "false");
+        setIsEnabled(false);
       }
     } catch (error) {
       console.error("알림 설정 변경 실패:", error);

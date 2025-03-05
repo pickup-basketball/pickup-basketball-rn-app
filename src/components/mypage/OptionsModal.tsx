@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "../../styles/colors";
+import NotificationSettingsModal from "../notification/NotificationSettingsModal";
 
 type TOptionsModal = {
   isVisible: boolean;
@@ -17,6 +18,13 @@ const OptionsModal = ({
   onLogout,
   onWithdrawal,
 }: TOptionsModal) => {
+  const [showNotificationSettings, setShowNotificationSettings] =
+    useState(false);
+
+  const handleNotificationSettingsClose = () => {
+    setShowNotificationSettings(false);
+    // 원래 코드가 여기 있었다면 그대로 유지
+  };
   return (
     <>
       <Modal
@@ -31,6 +39,19 @@ const OptionsModal = ({
           onPress={onClose}
         >
           <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={() => {
+                setShowNotificationSettings(true);
+                onClose();
+              }}
+            >
+              <Text style={[styles.optionText, styles.editProfileText]}>
+                알림 설정
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
             <TouchableOpacity
               style={styles.optionButton}
               onPress={() => {
@@ -71,6 +92,11 @@ const OptionsModal = ({
           </View>
         </TouchableOpacity>
       </Modal>
+
+      <NotificationSettingsModal
+        isVisible={showNotificationSettings}
+        onClose={handleNotificationSettingsClose}
+      />
     </>
   );
 };

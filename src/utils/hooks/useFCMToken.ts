@@ -4,6 +4,7 @@ import axiosInstance from "../../api/axios-interceptor";
 import { getCurrentUserId } from "../auth";
 import { Platform } from "react-native";
 import { getApp } from "@react-native-firebase/app";
+import * as Device from "expo-device";
 
 // FCM 토큰 관리를 위한 타입 정의
 type DeviceInfo = {
@@ -55,10 +56,21 @@ const FCMTokenManager = (): FCMTokenManagerReturn => {
   // FCM 토큰 가져오기
   const getFcmToken = async (): Promise<string | null> => {
     try {
-      await messaging().registerDeviceForRemoteMessages();
-      const token = await messaging().getToken();
-      console.log("FCM 토큰:", token);
-      return token;
+      if (Device.isDevice) {
+        await messaging().registerDeviceForRemoteMessages();
+        const token = await messaging().getToken();
+        console.log("FCM 토큰:", token);
+        setFcmToken(token);
+        return token;
+      } else {
+        // 시뮬레이터용 가짜 토큰 생성
+        const fakeToken = `simulator-${Math.random()
+          .toString(36)
+          .substring(2, 15)}`;
+        console.log("시뮬레이터 가짜 FCM 토큰:", fakeToken);
+        setFcmToken(fakeToken);
+        return fakeToken;
+      }
     } catch (error) {
       console.error("FCM 토큰 가져오기 실패:", error);
       return null;
