@@ -40,12 +40,12 @@ const styles = StyleSheet.create({
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     gap: 3,
   },
   mainButtonText: {
     color: "#fff",
     fontSize: 16,
+    lineHeight: 22,
   },
 });
 

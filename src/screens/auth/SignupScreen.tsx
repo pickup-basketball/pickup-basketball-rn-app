@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { SafeAreaView, StyleSheet, View, Alert } from "react-native";
 import SignupStep1 from "../../components/auth/signup/SignupStep1";
 import SignupStep2 from "../../components/auth/signup/SignupStep2";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TSignupForm } from "../../types/signup";
 import Header from "../../components/common/Header";
 import SignupTitle from "../../components/auth/signup/SignupTitle";

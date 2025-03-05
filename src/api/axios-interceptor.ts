@@ -25,11 +25,13 @@ axiosInstance.interceptors.request.use(
     console.log("🚀 요청 시작:", config.method?.toUpperCase(), config.url);
     console.log("📦 요청 데이터:", config.data);
     console.log("🔧 요청 헤더:", config.headers);
-
     if (
       config.url === "/auth/login" ||
       config.url === "/auth/signup" ||
-      config.url === "/auth/refresh"
+      config.url === "/auth/refresh" ||
+      config.url === "/member/check-email" ||
+      config.url === "/mail/issue-mail" ||
+      config.url === "/mail/verify-mail"
     ) {
       return config;
     }
