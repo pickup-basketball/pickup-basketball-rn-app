@@ -1,16 +1,46 @@
+// NotificationAlertBox.tsx
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  AppState,
+} from "react-native";
 import { Bell } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "../../styles/colors";
-import PushPermissionModal from "../permission/PushPermissionModal";
+import NotificationSettingsModal from "../notification/NotificationSettingsModal";
 
 const NotificationAlertBox = () => {
   const [showAlert, setShowAlert] = useState(false);
-  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
+  // AppState 모니터링 추가
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active") {
+        checkNotificationSettings();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  // 초기 마운트와 설정 변경 시 체크
   useEffect(() => {
     checkNotificationSettings();
+  }, []);
+
+  // 주기적으로 설정 확인 (1초마다)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      checkNotificationSettings();
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const checkNotificationSettings = async () => {
@@ -18,19 +48,19 @@ const NotificationAlertBox = () => {
       const notificationSettings = await AsyncStorage.getItem(
         "notificationSettings"
       );
-      setShowAlert(notificationSettings === "false");
+      setShowAlert(notificationSettings !== "true");
     } catch (error) {
       console.error("알림 설정 확인 중 오류:", error);
     }
   };
 
   const handleRequestPermission = () => {
-    setShowPermissionModal(true);
+    setShowSettingsModal(true);
   };
 
-  const handlePermissionModalClose = () => {
-    setShowPermissionModal(false);
-    // 모달이 닫힌 후 설정이 변경되었을 수 있으므로 상태 다시 확인
+  const handleSettingsModalClose = () => {
+    setShowSettingsModal(false);
+    // 모달이 닫힌 후에도 설정 다시 확인
     checkNotificationSettings();
   };
 
@@ -39,6 +69,7 @@ const NotificationAlertBox = () => {
   return (
     <>
       <View style={styles.container}>
+        {/* 기존 코드 */}
         <View style={styles.iconContainer}>
           <Bell size={20} color={colors.primary} />
         </View>
@@ -56,9 +87,9 @@ const NotificationAlertBox = () => {
         </TouchableOpacity>
       </View>
 
-      <PushPermissionModal
-        isVisible={showPermissionModal}
-        onClose={handlePermissionModalClose}
+      <NotificationSettingsModal
+        isVisible={showSettingsModal}
+        onClose={handleSettingsModalClose}
       />
     </>
   );
