@@ -8,21 +8,14 @@ export const decodeToken = (token: string): DecodedToken | null => {
       return null;
     }
 
-    const base64Url = token.split(".")[1];
-    const base64 =
-      base64Url.replace(/-/g, "+").replace(/_/g, "/") +
-      Array(4 - (base64Url.length % 4))
-        .fill("=")
-        .join("");
+    const base64Payload = token.split(".")[1];
+    const normalizedPayload = base64Payload
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
 
-    const jsonPayload = decodeURIComponent(
-      Base64.decode(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
+    const decodedPayload = Base64.decode(normalizedPayload);
 
-    return JSON.parse(jsonPayload);
+    return JSON.parse(decodedPayload);
   } catch (error) {
     console.error("Error decoding token:", error);
     return null;

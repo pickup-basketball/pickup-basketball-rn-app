@@ -31,7 +31,8 @@ axiosInstance.interceptors.request.use(
       config.url === "/auth/refresh" ||
       config.url === "/member/check-email" ||
       config.url === "/mail/issue-mail" ||
-      config.url === "/mail/verify-mail"
+      config.url === "/mail/verify-mail" ||
+      config.url === "/member"
     ) {
       return config;
     }
