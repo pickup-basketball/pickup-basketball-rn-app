@@ -1,4 +1,3 @@
-// screens/match/WriteMatchForm.tsx
 import React from "react";
 import {
   ScrollView,
@@ -98,6 +97,7 @@ const WriteMatchForm = ({ navigation }: Props) => {
           error={errors.datetime}
           showPicker={showDatePicker}
           onPress={() => setShowDatePicker(true)}
+          onPickerClose={() => setShowDatePicker(false)}
         />
 
         <LevelSelector
