@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import { TSignupStep1Props, TStep1Form } from "../../../types/signup";
 import { validateSignupStep1 } from "../../../utils/validators/signupValidator";
+import { colors } from "../../../styles/colors";
+import EmailVerificationInput from "../common/EmailVerificationInput";
 
 const SignupStep1: React.FC<TSignupStep1Props> = ({ onNext }) => {
   const [formData, setFormData] = useState<TStep1Form>({
@@ -18,8 +20,14 @@ const SignupStep1: React.FC<TSignupStep1Props> = ({ onNext }) => {
   });
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState("");
 
   const handleSubmit = () => {
+    if (!isEmailVerified || formData.email !== verifiedEmail) {
+      setErrors(["이메일 중복 확인이 필요합니다."]);
+      return;
+    }
     const validationErrors = validateSignupStep1(formData);
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
@@ -28,19 +36,28 @@ const SignupStep1: React.FC<TSignupStep1Props> = ({ onNext }) => {
     onNext(formData);
   };
 
+  const handleEmailChange = (email: string) => {
+    setFormData((prev) => ({ ...prev, email }));
+  };
+
+  const handleVerificationStatusChange = (
+    isVerified: boolean,
+    email: string
+  ) => {
+    setIsEmailVerified(isVerified);
+    setVerifiedEmail(email);
+  };
+
   return (
     <SafeAreaView>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>이메일</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.email}
-          onChangeText={(text) =>
-            setFormData((prev) => ({ ...prev, email: text }))
-          }
-          placeholder="example@gmail.com"
-          placeholderTextColor="#666"
+        <EmailVerificationInput
+          email={formData.email}
+          onEmailChange={handleEmailChange}
+          onVerificationStatusChange={handleVerificationStatusChange}
         />
+
         <Text style={styles.label}>비밀번호</Text>
         <TextInput
           style={styles.input}
@@ -52,6 +69,7 @@ const SignupStep1: React.FC<TSignupStep1Props> = ({ onNext }) => {
           placeholderTextColor="#666"
           secureTextEntry
         />
+
         <Text style={styles.label}>비밀번호 확인</Text>
         <TextInput
           style={styles.input}
@@ -61,6 +79,7 @@ const SignupStep1: React.FC<TSignupStep1Props> = ({ onNext }) => {
           placeholderTextColor="#666"
           secureTextEntry
         />
+
         <Text style={styles.label}>닉네임</Text>
         <TextInput
           style={styles.nickNameInput}
@@ -72,13 +91,11 @@ const SignupStep1: React.FC<TSignupStep1Props> = ({ onNext }) => {
           placeholderTextColor="#A0A0A0"
         />
       </View>
-
       {errors.map((error, index) => (
         <Text key={index} style={styles.errorText}>
           {error}
         </Text>
       ))}
-
       <View style={styles.signupStageContainer}>
         <TouchableOpacity style={[styles.signupButton]} onPress={handleSubmit}>
           <Text style={styles.signupButtonText}>다음</Text>
@@ -128,14 +145,22 @@ const styles = StyleSheet.create({
   },
   label: {
     color: "#666",
-    marginBottom: 8,
+    marginVertical: 8,
+  },
+  emailInput: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 15,
+    fontSize: 16,
+    height: 50,
   },
   input: {
     backgroundColor: "#fff",
     borderRadius: 8,
     padding: 15,
     fontSize: 16,
-    marginBottom: 8,
+    height: 50,
   },
   nickNameInput: {
     backgroundColor: "#3E3E3E",
@@ -151,7 +176,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 15,
     alignItems: "center",
-    marginTop: 20,
   },
   signButtonContainer: {
     flexDirection: "row",
@@ -168,6 +192,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "800",
+    lineHeight: 20,
   },
   loginLinkContainer: {
     flexDirection: "row",
@@ -207,7 +232,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   currentSignupStage: {
-    backgroundColor: "#F97316",
+    backgroundColor: colors.primary,
     borderRadius: 10,
     height: 5,
     width: 20,
@@ -224,6 +249,25 @@ const styles = StyleSheet.create({
     color: "red",
     fontSize: 14,
     marginTop: 4,
+  },
+  button: {
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+    lineHeight: 18,
+  },
+  emailInputContainer: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
   },
 });
 
