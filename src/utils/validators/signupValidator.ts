@@ -1,5 +1,9 @@
-// src/utils/validators/signupValidator.ts
-import { TSignupForm, TStep1Form, TStep2Form } from "../../types/signup";
+import { TStep1Form, TStep2Form } from "../../types/signup";
+
+export interface EnhancedTStep1Form extends TStep1Form {
+  isEmailVerified?: boolean;
+  verifiedEmail?: string;
+}
 
 export const validateSignupStep1 = (form: TStep1Form) => {
   const errors: string[] = [];
@@ -20,6 +24,32 @@ export const validateSignupStep1 = (form: TStep1Form) => {
   }
 
   return errors;
+};
+
+// 이메일 인증 여부까지 검증하는 확장된 함수
+export const validateSignupStep1WithEmailVerification = (
+  form: EnhancedTStep1Form
+) => {
+  // 기본 검증 실행
+  const errors = validateSignupStep1(form);
+
+  // 이메일 인증 여부 검증 추가
+  if (!form.isEmailVerified || form.email !== form.verifiedEmail) {
+    errors.push("이메일 인증이 필요합니다.");
+  }
+
+  return errors;
+};
+
+// 빈 필드 검증 함수 추가 (모든 필수 필드가 입력되었는지 확인)
+export const checkRequiredFields = (form: TStep1Form) => {
+  const emptyFields: string[] = [];
+
+  if (!form.email) emptyFields.push("이메일");
+  if (!form.password) emptyFields.push("비밀번호");
+  if (!form.nickname) emptyFields.push("닉네임");
+
+  return emptyFields;
 };
 
 export const validateSignupStep2 = (form: TStep2Form) => {
@@ -45,4 +75,16 @@ export const validateSignupStep2 = (form: TStep2Form) => {
   }
 
   return errors;
+};
+
+// Step2 빈 필드 검증 함수 추가
+export const checkRequiredFieldsStep2 = (form: TStep2Form) => {
+  const emptyFields: string[] = [];
+
+  if (!form.height) emptyFields.push("키");
+  if (!form.weight) emptyFields.push("몸무게");
+  if (!form.position) emptyFields.push("선호 포지션");
+  if (!form.level) emptyFields.push("실력 수준");
+
+  return emptyFields;
 };
