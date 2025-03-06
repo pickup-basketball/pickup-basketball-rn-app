@@ -19,7 +19,6 @@ import {
   levelsWithLabel,
 } from "../../../types/signup";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { validateSignupStep2 } from "../../../utils/validators/signupValidator";
 import { TNavigationProp } from "../../../types/navigation";
 import { colors } from "../../../styles/colors";

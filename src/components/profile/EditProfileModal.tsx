@@ -1,4 +1,3 @@
-// components/profile/EditProfileModal.tsx
 import React, { useEffect, useState } from "react";
 import {
   Modal,
@@ -17,13 +16,14 @@ import {
   positions,
   levelsWithLabel,
   positionMapping,
+  levels,
 } from "../../types/signup";
 
 type EditProfileModalProps = {
   isVisible: boolean;
   onClose: () => void;
-  currentProfile: any; // 현재 프로필 정보
-  onUpdate: () => void; // 프로필 업데이트 후 호출할 함수
+  currentProfile: any;
+  onUpdate: () => void;
 };
 
 const EditProfileModal = ({
@@ -60,10 +60,10 @@ const EditProfileModal = ({
 
   const handleSubmit = async () => {
     try {
-      if (!formData.password) {
-        Alert.alert("알림", "비밀번호를 입력해주세요");
-        return;
-      }
+      // if (!formData.password) {
+      //   Alert.alert("알림", "비밀번호를 입력해주세요");
+      //   return;
+      // }
 
       const requestData = {
         email: formData.email,
@@ -97,7 +97,7 @@ const EditProfileModal = ({
           </View>
 
           <View style={styles.form}>
-            <View style={styles.inputContainer}>
+            {/* <View style={styles.inputContainer}>
               <Text style={styles.label}>비밀번호</Text>
               <TextInput
                 style={styles.input}
@@ -112,7 +112,7 @@ const EditProfileModal = ({
                 placeholderTextColor={colors.grey.light}
                 secureTextEntry
               />
-            </View>
+            </View> */}
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>닉네임</Text>
@@ -232,22 +232,26 @@ const EditProfileModal = ({
             >
               <View style={styles.modalOverlay}>
                 <View style={styles.selectionModalContent}>
-                  <Text style={styles.modalTitle}>레벨 선택</Text>
-                  {levelsWithLabel.map((level) => (
-                    <TouchableOpacity
-                      key={level.value}
-                      style={styles.modalItem}
-                      onPress={() => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          level: level.value,
-                        }));
-                        setShowLevelModal(false);
-                      }}
-                    >
-                      <Text style={styles.modalItemText}>{level.label}</Text>
-                    </TouchableOpacity>
-                  ))}
+                  <Text style={styles.modalTitle}>실력 수준 선택</Text>
+                  {levels.map((level) => {
+                    const levelWithLabel = levelsWithLabel.find(
+                      (l) => l.value === level
+                    );
+                    return (
+                      <TouchableOpacity
+                        key={level}
+                        style={styles.modalItem}
+                        onPress={() => {
+                          setFormData((prev) => ({ ...prev, level }));
+                          setShowLevelModal(false);
+                        }}
+                      >
+                        <Text style={styles.modalItemText}>
+                          {levelWithLabel ? levelWithLabel.label : level}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                   <TouchableOpacity
                     style={styles.modalCloseButton}
                     onPress={() => setShowLevelModal(false)}
@@ -279,6 +283,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
     width: "90%",
