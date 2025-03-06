@@ -54,6 +54,12 @@ export const MatchDetailModal = ({
     initializeUserId();
   }, []);
 
+  useEffect(() => {
+    console.log("Match Data:", match);
+    console.log("District:", match.district);
+    console.log("Location Detail:", match.locationDetail);
+  }, [match]);
+
   const isMyMatch = currentUserId === match.hostId;
 
   const ProgressBar = ({ current, max }: { current: number; max: number }) => (
@@ -105,7 +111,7 @@ export const MatchDetailModal = ({
                 <View style={styles.locationRow}>
                   <MapPin size={16} color={colors.primary} />
                   <Text style={styles.location}>
-                    {`${match.district || ""} ${match.locationDetail || ""}`}
+                    {`${match.district || ""} · ${match.locationDetail || ""}`}
                   </Text>
                 </View>
               </View>

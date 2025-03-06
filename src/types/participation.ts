@@ -18,7 +18,7 @@ export type Match = {
   id: number;
   title: string;
   courtName: string;
-  location: string;
+  district: string;
   date: string;
   time: string;
   currentPlayers: number;

@@ -32,4 +32,4 @@ export const getPositionText = (position: string | null) =>
   }[position || ""] || "미설정");
 
 export const getLevelText = (level: string | null) =>
-  level ? `${level}` : "미설정";
+  level ? formatLevel(level as Level) : "미설정";
