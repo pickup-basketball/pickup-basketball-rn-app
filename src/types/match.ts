@@ -31,7 +31,8 @@ export type Match = {
   title: string;
   description: string;
   courtName: string;
-  location: string;
+  district: string;
+  locationDetail: string;
   date: string;
   time: string;
   level: string;

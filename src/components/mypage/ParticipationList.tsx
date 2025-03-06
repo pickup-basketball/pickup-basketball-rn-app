@@ -193,8 +193,8 @@ const ParticipationList = ({
   const convertMatchToPost = (match: any): Post => {
     return {
       ...match,
-      district: match.location || "",
-      locationDetail: "",
+      district: match.district || "",
+      locationDetail: match.locationDetail || "",
       level: match.level as Level,
     };
   };
@@ -224,7 +224,7 @@ const ParticipationList = ({
                     <View style={styles.iconTextContainer}>
                       <MapPin size={16} color={colors.grey.light} />
                       <Text style={styles.infoText}>
-                        {item.match.courtName} · {item.match.location}
+                        {item.match.district} · {item.match.courtName}
                       </Text>
                     </View>
                   </View>

@@ -14,7 +14,7 @@ import { ProfileDetails } from "../../components/profile/ProfileDetails";
 import ParticipationList from "../../components/mypage/ParticipationList";
 import { useUserProfile } from "../../utils/hooks/useUserProfile";
 import { useLogout } from "../../utils/hooks/useLogout";
-import { useParticipations } from "../../utils/hooks/useparticipations";
+import { useParticipations } from "../../utils/hooks/useParticipations";
 import EditProfileModal from "../../components/profile/EditProfileModal";
 import { matchEventEmitter } from "../../utils/event";
 import WithdrawalModal from "../../components/mypage/WithdrawalModal";
@@ -22,7 +22,6 @@ import OptionsModal from "../../components/mypage/OptionsModal";
 import { withdrawMembership } from "../../api/member";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MyPageNavigationProp } from "../../types/navigation";
-import PushPermissionModal from "../../components/permission/PushPermissionModal";
 import NotificationAlertBox from "../../components/notification/NotificationAlertBox";
 
 export const MyPageScreen = ({
