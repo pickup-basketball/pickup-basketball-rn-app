@@ -32,6 +32,8 @@ const EmailVerificationInput = ({
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [codeMessage, setCodeMessage] = useState("");
   const [isChecking, setIsChecking] = useState(false);
+  const [isCodeVerified, setIsCodeVerified] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const handleEmailChange = (text: string) => {
     onEmailChange(text);
@@ -40,6 +42,7 @@ const EmailVerificationInput = ({
       setEmailCheckMessage("");
       setIsCodeSent(false);
       setVerificationCode("");
+      setIsCodeVerified(false);
       onVerificationStatusChange(false, "");
     }
   };
@@ -71,26 +74,27 @@ const EmailVerificationInput = ({
   };
 
   const handleVerifyCode = async () => {
+    setIsVerifying(true);
     const result = await verifyEmailCode(email, Number(verificationCode));
     setCodeMessage(result.message);
     if (result.success) {
+      setIsCodeVerified(true);
       onVerificationStatusChange(true, email);
     }
+    setIsVerifying(false);
   };
 
   return (
     <>
       <View style={styles.emailInputContainer}>
         <TextInput
-          style={[
-            styles.emailInput,
-            isEmailVerified && { borderColor: "green", borderWidth: 1 },
-          ]}
+          style={[styles.emailInput, isEmailVerified && styles.verifiedInput]}
           value={email}
           onChangeText={handleEmailChange}
           placeholder="example@gmail.com"
-          placeholderTextColor="#666"
+          placeholderTextColor="#A0A0A0"
           editable={!isEmailVerified}
+          selectionColor={colors.primary}
         />
         <TouchableOpacity
           style={[styles.button, isEmailVerified ? styles.disabledButton : {}]}
@@ -109,22 +113,41 @@ const EmailVerificationInput = ({
       {emailCheckMessage ? (
         <Text style={styles.errorText}>{emailCheckMessage}</Text>
       ) : null}
-      {isCodeSent && (
+      {isCodeSent && !isCodeVerified && (
         <View style={styles.verificationContainer}>
           <TextInput
-            style={styles.codeInput}
+            style={[styles.codeInput, isCodeVerified && styles.verifiedInput]}
             value={verificationCode}
             onChangeText={setVerificationCode}
             placeholder="인증 코드 입력"
-            placeholderTextColor="#666"
+            placeholderTextColor="#A0A0A0"
             keyboardType="number-pad"
+            editable={!isCodeVerified}
+            selectionColor={colors.primary}
           />
-          <TouchableOpacity style={styles.button} onPress={handleVerifyCode}>
-            <Text style={styles.buttonText}>인증 확인</Text>
+          <TouchableOpacity
+            style={[styles.button, isCodeVerified ? styles.disabledButton : {}]}
+            onPress={handleVerifyCode}
+            disabled={isCodeVerified || isVerifying}
+          >
+            <Text style={styles.buttonText}>
+              {isCodeVerified
+                ? "확인됨 ✓"
+                : isVerifying
+                ? "확인 중..."
+                : "인증 확인"}
+            </Text>
           </TouchableOpacity>
         </View>
       )}
-      {codeMessage ? <Text style={styles.errorText}>{codeMessage}</Text> : null}
+      {isCodeVerified && (
+        <View style={styles.verificationSuccessContainer}>
+          <Text style={styles.successText}>이메일 인증이 완료되었습니다 ✓</Text>
+        </View>
+      )}
+      {codeMessage && !isCodeVerified ? (
+        <Text style={styles.errorText}>{codeMessage}</Text>
+      ) : null}
     </>
   );
 };
@@ -134,14 +157,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    marginBottom: 10,
   },
   emailInput: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: "#696969",
     borderRadius: 8,
     padding: 15,
     fontSize: 16,
     height: 50,
+    color: colors.primary,
+  },
+  verifiedInput: {
+    borderColor: colors.primary,
+    borderWidth: 1,
+    backgroundColor: "rgba(255, 107, 0, 0.1)",
   },
   button: {
     backgroundColor: colors.primary,
@@ -150,7 +182,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   disabledButton: {
-    backgroundColor: "gray",
+    backgroundColor: "#696969",
   },
   buttonText: {
     color: "#fff",
@@ -159,23 +191,42 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   errorText: {
-    color: "red",
+    color: colors.primary,
     fontSize: 14,
     marginTop: 4,
+    marginBottom: 8,
   },
   verificationContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginTop: 10,
+    marginBottom: 10,
   },
   codeInput: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#3E3E3E",
+    borderWidth: 1,
+    borderColor: "#696969",
     borderRadius: 8,
     padding: 15,
     fontSize: 16,
     height: 50,
+    color: colors.primary,
+  },
+  verificationSuccessContainer: {
+    marginTop: 4,
+    marginBottom: 10,
+    paddingVertical: 10,
+    backgroundColor: "rgba(255, 107, 0, 0.1)",
+    borderRadius: 8,
+    borderColor: colors.primary || "#ff6b00",
+    borderWidth: 1,
+    alignItems: "center",
+  },
+  successText: {
+    color: colors.primary || "#ff6b00",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 
