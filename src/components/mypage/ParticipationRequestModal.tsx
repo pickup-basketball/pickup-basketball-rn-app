@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Alert,
 } from "react-native";
 import { colors } from "../../styles/colors";
 import { X, ChevronRight } from "lucide-react-native";
 import { ParticipationDetail } from "../../types/participation";
+import axiosInstance from "../../api/axios-interceptor";
 
 type ParticipationRequestModalProps = {
   isVisible: boolean;
@@ -38,6 +40,18 @@ const ParticipationRequestModal = ({
     setSelectedParticipation(null);
   };
 
+  const sendNotification = async (title: string, body: string) => {
+    try {
+      const response = await axiosInstance.post("/notification/all", {
+        title,
+        body,
+      });
+      console.log("알림 전송 성공:", response.data);
+    } catch (error) {
+      console.error("알림 전송 실패:", error);
+    }
+  };
+
   return (
     <Modal
       visible={isVisible}
@@ -58,30 +72,58 @@ const ParticipationRequestModal = ({
 
           {!selectedParticipation ? (
             // 참가자 목록 화면
-            <ScrollView style={styles.participantsList}>
-              {participations.map((participation, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.participantItem}
-                  onPress={() => handleParticipantSelect(participation)}
-                >
-                  <View style={styles.participantInfo}>
-                    <Text style={styles.participantName}>
-                      {participation.member.nickname}
-                    </Text>
-                    <Text style={styles.participantLevel}>
-                      {participation.member.level}
-                    </Text>
-                  </View>
-                  <View style={styles.participantStatus}>
-                    <Text style={styles.statusText}>
-                      {participation.participation.status}
-                    </Text>
-                    <ChevronRight size={20} color={colors.grey.light} />
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            <>
+              <ScrollView style={styles.participantsList}>
+                {participations.map((participation, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.participantItem}
+                    onPress={() => handleParticipantSelect(participation)}
+                  >
+                    <View style={styles.participantInfo}>
+                      <Text style={styles.participantName}>
+                        {participation.member.nickname}
+                      </Text>
+                      <Text style={styles.participantLevel}>
+                        {{
+                          BEGINNER: "초급",
+                          INTERMEDIATE: "중급",
+                          ADVANCED: "고급",
+                        }[participation.member.level] || "알 수 없음"}
+                      </Text>
+                    </View>
+                    <View style={styles.participantStatus}>
+                      <Text style={styles.statusText}>
+                        {{
+                          PENDING: "대기 중",
+                          ACCEPTED: "수락",
+                          REJECTED: "거절",
+                        }[participation.participation.status] || "알 수 없음"}
+                      </Text>
+                      <ChevronRight size={20} color={colors.grey.light} />
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+              <TouchableOpacity
+                style={styles.notificationButton}
+                onPress={() => {
+                  // 입력 받는 다이얼로그 표시 또는 직접 알림 전송
+                  sendNotification(
+                    "매치 안내",
+                    "오늘 매치에 참여해주셔서 감사합니다. 정시에 시작하니 늦지 마세요!"
+                  );
+                  Alert.alert(
+                    "알림 전송",
+                    "모든 참가자에게 알림이 전송되었습니다."
+                  );
+                }}
+              >
+                <Text style={styles.notificationButtonText}>
+                  모든 참가자에게 알림 보내기
+                </Text>
+              </TouchableOpacity>
+            </>
           ) : (
             // 선택된 참가자 상세 화면
             <>
@@ -97,7 +139,11 @@ const ParticipationRequestModal = ({
 
                 <Text style={styles.label}>레벨</Text>
                 <Text style={styles.value}>
-                  {selectedParticipation.member.level}
+                  {{
+                    BEGINNER: "초급",
+                    INTERMEDIATE: "중급",
+                    ADVANCED: "고급",
+                  }[selectedParticipation.member.level] || "알 수 없음"}
                 </Text>
 
                 <Text style={styles.label}>신청 메시지</Text>
@@ -240,6 +286,18 @@ const styles = StyleSheet.create({
   buttonText: {
     color: colors.white,
     fontSize: 16,
+    fontWeight: "600",
+  },
+  notificationButton: {
+    backgroundColor: colors.grey.medium,
+    marginTop: 16,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  notificationButtonText: {
+    color: colors.white,
+    fontSize: 14,
     fontWeight: "600",
   },
 });
