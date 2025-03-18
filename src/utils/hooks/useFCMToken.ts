@@ -31,16 +31,18 @@ const FCMTokenManager = (): FCMTokenManagerReturn => {
   const [deviceId, setDeviceId] = useState<number | null>(null);
 
   useEffect(() => {
-    // Firebase 초기화 확인
     try {
-      getApp(); // 최신 방식으로 앱 확인
-      // 초기화된 경우에만 FCM 토큰을 가져옴
-      getFcmToken();
+      getApp(); // Firebase 앱 초기화 확인
+      getFcmToken(); // FCM 토큰 가져오기
 
       // 토큰 갱신 이벤트 리스너
       const unsubscribe = messaging().onTokenRefresh(async (newToken) => {
         console.log("FCM 토큰 갱신:", newToken);
+
+        // 새로운 토큰을 상태로 저장
         setFcmToken(newToken);
+
+        // 서버에도 새로운 토큰을 저장 (비동기 요청)
         await saveFcmTokenToServer(newToken);
       });
 
@@ -161,7 +163,7 @@ const FCMTokenManager = (): FCMTokenManagerReturn => {
 
 const getMemberId = async (): Promise<number> => {
   const userId = await getCurrentUserId();
-  return userId ?? 0; // null이면 0 반환 또는 다른 기본값
+  return userId ?? 0;
 };
 
 const getDeviceType = (): "IOS" | "ANDROID" => {
