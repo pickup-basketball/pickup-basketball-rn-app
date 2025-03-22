@@ -1,23 +1,14 @@
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 import { StyleSheet } from "react-native";
-import type { StackNavigationProp } from "@react-navigation/stack";
-
-type RootStackParamList = {
-  Start: undefined;
-  Login: undefined;
-  Signup: undefined;
-};
-
-type NavigationProp = StackNavigationProp<RootStackParamList>;
 
 const LoginLink = () => {
-  const navigation = useNavigation<NavigationProp>();
+  const router = useRouter();
 
   return (
     <View style={styles.loginLinkContainer}>
       <Text style={styles.loginText}>이미 계정이 있으신가요?</Text>
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+      <TouchableOpacity onPress={() => router.push("login")}>
         <Text style={styles.loginLink}>로그인하기</Text>
       </TouchableOpacity>
     </View>

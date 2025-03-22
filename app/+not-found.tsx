@@ -1,32 +1,15 @@
-import { Link, Stack } from 'expo-router';
-import { StyleSheet } from 'react-native';
-
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Redirect } from "expo-router";
+import { useContext } from "react";
+import { AuthContext } from "./_layout";
 
 export default function NotFoundScreen() {
-  return (
-    <>
-      <Stack.Screen options={{ title: 'Oops!' }} />
-      <ThemedView style={styles.container}>
-        <ThemedText type="title">This screen doesn't exist.</ThemedText>
-        <Link href="/" style={styles.link}>
-          <ThemedText type="link">Go to home screen!</ThemedText>
-        </Link>
-      </ThemedView>
-    </>
-  );
-}
+  const authContext = useContext(AuthContext);
+  const isLoggedIn = authContext ? authContext.isLoggedIn : false;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-});
+  // 단순히 Redirect 컴포넌트를 사용하여 리디렉션
+  if (isLoggedIn) {
+    return <Redirect href="/(tabs)" />;
+  } else {
+    return <Redirect href="/(auth)/start" />;
+  }
+}

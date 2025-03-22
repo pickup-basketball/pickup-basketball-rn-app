@@ -1,12 +1,10 @@
 import React from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
-import LoginForm from "../../components/auth/login/LoginForm";
-import Header from "../../components/common/Header";
+import LoginForm from "../../../src/components/auth/login/LoginForm";
 
 const LoginScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
       <LoginForm />
     </SafeAreaView>
   );

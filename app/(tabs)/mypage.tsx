@@ -8,27 +8,23 @@ import {
   ScrollView,
 } from "react-native";
 import { MoreVertical, Edit2 } from "lucide-react-native";
-import { colors } from "../../styles/colors";
-import LoggedInHeader from "../../components/common/LoggedInHeader";
-import { ProfileDetails } from "../../components/profile/ProfileDetails";
-import ParticipationList from "../../components/mypage/ParticipationList";
-import { useUserProfile } from "../../utils/hooks/useUserProfile";
-import { useLogout } from "../../utils/hooks/useLogout";
-import { useParticipations } from "../../utils/hooks/useParticipations";
-import EditProfileModal from "../../components/profile/EditProfileModal";
-import { matchEventEmitter } from "../../utils/event";
-import WithdrawalModal from "../../components/mypage/WithdrawalModal";
-import OptionsModal from "../../components/mypage/OptionsModal";
-import { withdrawMembership } from "../../api/member";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { MyPageNavigationProp } from "../../types/navigation";
-import NotificationAlertBox from "../../components/notification/NotificationAlertBox";
+import { MyPageNavigationProp } from "../../src/types/navigation";
+import { useLogout } from "../../src/utils/hooks/useLogout";
+import { useUserProfile } from "../../src/utils/hooks/useUserProfile";
+import { useParticipations } from "../../src/utils/hooks/useParticipations";
+import { withdrawMembership } from "../../src/api/member";
+import { matchEventEmitter } from "../../src/utils/event";
+import LoggedInHeader from "../../src/components/common/LoggedInHeader";
+import NotificationAlertBox from "../../src/components/notification/NotificationAlertBox";
+import { colors } from "../../src/styles/colors";
+import OptionsModal from "../../src/components/mypage/OptionsModal";
+import { ProfileDetails } from "../../src/components/profile/ProfileDetails";
+import EditProfileModal from "../../src/components/profile/EditProfileModal";
+import WithdrawalModal from "../../src/components/mypage/WithdrawalModal";
+import ParticipationList from "../../src/components/mypage/ParticipationList";
 
-export const MyPageScreen = ({
-  navigation,
-}: {
-  navigation: MyPageNavigationProp;
-}) => {
+const MyPageScreen = ({ navigation }: { navigation: MyPageNavigationProp }) => {
   const handleLogout = useLogout();
   const {
     userProfile,
@@ -105,7 +101,6 @@ export const MyPageScreen = ({
 
   return (
     <SafeAreaView style={styles.container}>
-      <LoggedInHeader />
       <ScrollView nestedScrollEnabled>
         <NotificationAlertBox />
         <View style={styles.header}>
@@ -260,3 +255,5 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 });
+
+export default MyPageScreen;

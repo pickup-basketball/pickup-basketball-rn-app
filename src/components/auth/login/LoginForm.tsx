@@ -6,28 +6,37 @@ import {
   StyleSheet,
 } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import SignupLink from "../signup/SignupLink";
-import { useNavigation } from "@react-navigation/native";
-import { TNavigationProp } from "../../../types/navigation";
 import { handleLogin } from "../../../utils/auth/handleLogin";
-import axiosInstance from "../../../api/axios-interceptor";
+import { useRouter } from "expo-router";
+import { AuthContext } from "../../../../app/_layout";
 
 const LoginForm = () => {
-  const navigation = useNavigation<TNavigationProp>();
+  const router = useRouter(); // 변경
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberLogin, setRememberLogin] = useState(false);
   const [error, setError] = useState("");
 
+  // AuthContext에서 setIsLoggedIn 가져오기
+  const authContext = useContext(AuthContext);
+  const setIsLoggedIn = authContext ? authContext.setIsLoggedIn : null;
+
   const onLoginPress = async () => {
-    await handleLogin({
+    const shouldNavigate = true;
+    const success = await handleLogin({
       email,
       password,
-      navigation,
-      axiosInstance,
+      router,
       onError: setError,
+      shouldNavigate,
+      onSuccess: () => {
+        // 로그인 성공 시 AuthContext 상태 업데이트
+        if (setIsLoggedIn) {
+          setIsLoggedIn(true);
+        }
+      },
     });
   };
 

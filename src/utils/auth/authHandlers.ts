@@ -1,7 +1,18 @@
-// authHandlers.ts
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { decodeToken } from "./decodeToken";
-import { authEventEmitter, LoginEventData } from "../event";
+import { Router } from "expo-router";
+import EventEmitter from "eventemitter3";
+
+export const authEventEmitter = new EventEmitter();
+
+type TLoginEventData = {
+  accessToken: string;
+  refreshToken: string;
+  jti: string;
+  router: Router;
+  shouldNavigate?: boolean;
+  callback?: () => void;
+};
 
 // 로그인 이벤트 핸들러 등록
 export const setupAuthHandlers = () => {
@@ -13,13 +24,13 @@ export const setupAuthHandlers = () => {
 };
 
 // 로그인 이벤트 처리 함수
-const handleLoginEvent = async (data: LoginEventData) => {
+const handleLoginEvent = async (data: TLoginEventData) => {
   try {
     const {
       accessToken,
       refreshToken,
       jti,
-      navigation,
+      router,
       shouldNavigate = true,
       callback,
     } = data;
@@ -43,11 +54,8 @@ const handleLoginEvent = async (data: LoginEventData) => {
     }
 
     // 네비게이션 처리
-    if (shouldNavigate && navigation) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "MainTab" }],
-      });
+    if (shouldNavigate && router) {
+      router.replace("(tabs)/index");
     }
   } catch (error) {
     console.error("로그인 처리 실패:", error);

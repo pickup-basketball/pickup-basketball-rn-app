@@ -7,25 +7,25 @@ import {
   Text,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { WriteScreenNavigationProp } from "../../types/navigation";
-import { GradientWithBox } from "../../components/common/Gradient";
-import { useMatchForm } from "../../utils/hooks/useMatchForm";
-import { useMatchValidation } from "../../utils/hooks/useMatchValidation";
-import { useMatchSubmit } from "../../utils/hooks/useMatchSubmit";
-import { Header } from "../../components/match/write/Header";
-import { TitleInput } from "../../components/match/write/TitleInput";
-import { LocationInputs } from "../../components/match/write/LocationInputs";
-import { DateTimePickerComponent } from "../../components/match/write/DateTimePicker";
+import { WriteScreenNavigationProp } from "../../src/types/navigation";
+import { useMatchForm } from "../../src/utils/hooks/useMatchForm";
+import { useMatchValidation } from "../../src/utils/hooks/useMatchValidation";
+import { useMatchSubmit } from "../../src/utils/hooks/useMatchSubmit";
+import { TitleInput } from "../../src/components/match/write/TitleInput";
+import { LocationInputs } from "../../src/components/match/write/LocationInputs";
+import { DateTimePickerComponent } from "../../src/components/match/write/DateTimePicker";
+import { LevelSelector } from "../../src/components/match/write/LevelSelector";
 import {
   handleAddRule,
   handleDateTimeChange,
   handleRemoveRule,
   handleRuleChange,
-} from "../../utils/match/formHandlers";
-import { LevelSelector } from "../../components/match/write/LevelSelector";
-import { PlayersCostInputs } from "../../components/match/write/PlayersCostInputs";
-import { DescriptionInput } from "../../components/match/write/DescriptionInput";
-import { RulesInput } from "../../components/match/write/RulesInput";
+} from "../../src/utils/match/formHandlers";
+import { PlayersCostInputs } from "../../src/components/match/write/PlayersCostInputs";
+import { DescriptionInput } from "../../src/components/match/write/DescriptionInput";
+import { RulesInput } from "../../src/components/match/write/RulesInput";
+import { GradientWithBox } from "../../src/components/common/Gradient";
+import { Header } from "../../src/components/match/write/Header";
 
 type Props = {
   navigation: WriteScreenNavigationProp;
