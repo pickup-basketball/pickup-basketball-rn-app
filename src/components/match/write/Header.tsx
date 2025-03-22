@@ -2,30 +2,15 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { ArrowLeft } from "lucide-react-native";
 import { colors } from "../../../styles/colors";
-import {
-  MatchingStackParamList,
-  MyPageStackParamList,
-} from "../../../types/navigation";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { StackNavigationProp } from "@react-navigation/stack";
 
 type HeaderProps = {
   title: string;
   subtitle: string;
-  navigation:
-    | NativeStackNavigationProp<MatchingStackParamList, "WriteMatch">
-    | StackNavigationProp<MyPageStackParamList, "EditMatch">;
   backText: string;
   onBack: () => void;
 };
 
-export const Header = ({
-  title,
-  subtitle,
-  navigation,
-  backText,
-  onBack,
-}: HeaderProps) => (
+export const Header = ({ title, subtitle, backText, onBack }: HeaderProps) => (
   <View style={styles.header}>
     <TouchableOpacity style={styles.backButton} onPress={onBack}>
       <ArrowLeft color={colors.grey.light} size={24} />

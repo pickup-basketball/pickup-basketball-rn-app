@@ -5,6 +5,8 @@ import { LogoutHandler } from "../src/components/common/LogoutHandler";
 import FCMTokenManager from "../src/utils/hooks/useFCMToken";
 import { initializeApp, getApps } from "@react-native-firebase/app";
 import { createContext } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { StyleSheet } from "react-native";
 
 // 앱 컴포넌트 외부에서 Firebase 초기화
 try {
@@ -136,9 +138,17 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
-      <LogoutHandler />
-      <Slot />
-    </AuthContext.Provider>
+    <GestureHandlerRootView style={styles.container}>
+      <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+        <LogoutHandler />
+        <Slot />
+      </AuthContext.Provider>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

@@ -1,27 +1,19 @@
 import { useState } from "react";
 import { Alert } from "react-native";
+import { Router } from "expo-router";
 import { matchEventEmitter } from "../event";
 import { TFormData } from "../validators/types";
 import axiosInstance from "../../api/axios-interceptor";
 import { handleMatchSubmitError } from "../errors/errorHandlers";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { MyPageStackParamList } from "../../types/navigation";
-import { RouteProp } from "@react-navigation/native";
-
-type EditScreenNavigationProp = StackNavigationProp<
-  MyPageStackParamList,
-  "EditMatch"
->;
 
 export const useEditMatchSubmit = (
-  navigation: EditScreenNavigationProp,
+  router: Router,
   validateForm: (data: TFormData) => {
     isValid: boolean;
     errors: { [key: string]: string };
   },
   matchId: string,
-  matchData: any,
-  route?: RouteProp<MyPageStackParamList, "EditMatch">
+  matchData: any
 ) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -73,7 +65,7 @@ export const useEditMatchSubmit = (
         Alert.alert("성공", "매치가 수정되었습니다", [
           {
             text: "확인",
-            onPress: () => navigation.goBack(),
+            onPress: () => router.back(),
           },
         ]);
       }
