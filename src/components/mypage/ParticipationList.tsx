@@ -1,4 +1,3 @@
-// components/match/ParticipationList.tsx
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import {
@@ -23,29 +22,32 @@ import { RootStackParamList } from "../../types/navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Level, Post } from "../../types/match";
 import { MatchDetailModal } from "../match/MatchDetailModal";
+import { useRouter } from "expo-router";
+import { useEditMatchStore } from "../../utils/store/editMatchStore";
 
 const ParticipationList = ({
   participations,
   onUpdate,
 }: ParticipationListProps) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
   const [selectedMatchParticipations, setSelectedMatchParticipations] =
     useState<ParticipationDetail[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [localParticipations, setLocalParticipations] =
     useState(participations);
   const [selectedMatch, setSelectedMatch] = useState<Post | null>(null);
+  const router = useRouter();
+  const setMatchData = useEditMatchStore((state) => state.setMatchData);
 
   useEffect(() => {
     setLocalParticipations(participations);
   }, [participations]);
 
   const handleEditMatch = (matchData: any) => {
-    navigation.navigate("EditMatch", {
-      matchData,
-      onUpdate,
-    });
+    // 스토어에 매치 데이터 저장
+    setMatchData(matchData);
+    // 수정 페이지로 이동 (ID만 URL에 포함)
+    router.push(`/matching/${matchData.id}/edit`);
   };
 
   console.log("participations", JSON.stringify(participations, null, 2));

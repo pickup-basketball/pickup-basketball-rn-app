@@ -15,7 +15,6 @@ import { useUserProfile } from "../../src/utils/hooks/useUserProfile";
 import { useParticipations } from "../../src/utils/hooks/useParticipations";
 import { withdrawMembership } from "../../src/api/member";
 import { matchEventEmitter } from "../../src/utils/event";
-import LoggedInHeader from "../../src/components/common/LoggedInHeader";
 import NotificationAlertBox from "../../src/components/notification/NotificationAlertBox";
 import { colors } from "../../src/styles/colors";
 import OptionsModal from "../../src/components/mypage/OptionsModal";
@@ -23,8 +22,10 @@ import { ProfileDetails } from "../../src/components/profile/ProfileDetails";
 import EditProfileModal from "../../src/components/profile/EditProfileModal";
 import WithdrawalModal from "../../src/components/mypage/WithdrawalModal";
 import ParticipationList from "../../src/components/mypage/ParticipationList";
+import { useRouter } from "expo-router";
 
 const MyPageScreen = ({ navigation }: { navigation: MyPageNavigationProp }) => {
+  const router = useRouter();
   const handleLogout = useLogout();
   const {
     userProfile,
@@ -65,10 +66,7 @@ const MyPageScreen = ({ navigation }: { navigation: MyPageNavigationProp }) => {
       try {
         const token = await AsyncStorage.getItem("accessToken");
         if (!token) {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: "Start" }],
-          });
+          router.replace("/(auth)/start");
           return;
         }
 

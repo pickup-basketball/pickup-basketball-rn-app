@@ -10,15 +10,11 @@ import {
 import { colors } from "../../styles/colors";
 import { GradientWithBox } from "../common/Gradient";
 import { validateForm } from "../../utils/validators/matchValidator";
-import { RouteProp } from "@react-navigation/native";
-import { MyPageStackParamList } from "../../types/navigation";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { LocationInputs } from "./write/LocationInputs";
 import { Header } from "./write/Header";
 import { useEditMatchForm } from "../../utils/hooks/useEditMatchForm";
 import { useEditMatchSubmit } from "../../utils/hooks/useEditMatchSubmit";
 import { TitleInput } from "./write/TitleInput";
-import { DateTimePickerComponent } from "./write/DateTimePicker";
 import {
   handleAddRule,
   handleDateTimeChange,
@@ -29,14 +25,16 @@ import { LevelSelector } from "./write/LevelSelector";
 import { PlayersCostInputs } from "./write/PlayersCostInputs";
 import { DescriptionInput } from "./write/DescriptionInput";
 import { RulesInput } from "./write/RulesInput";
+import { useRouter } from "expo-router";
+import { DateTimePickerComponent } from "./write/DateTimePicker";
 
 type EditMatchScreenProps = {
-  route: RouteProp<MyPageStackParamList, "EditMatch">;
-  navigation: StackNavigationProp<MyPageStackParamList, "EditMatch">;
+  matchData: any;
+  matchId: string;
 };
 
-const EditMatchScreen = ({ route, navigation }: EditMatchScreenProps) => {
-  const { matchData } = route.params;
+const EditMatchScreen = ({ matchData, matchId }: EditMatchScreenProps) => {
+  const router = useRouter();
 
   const {
     formData,
@@ -53,17 +51,18 @@ const EditMatchScreen = ({ route, navigation }: EditMatchScreenProps) => {
     console.log("Form data updated:", formData);
   }, [formData]);
 
+  // 폼 제출 관련 훅
+  const { handleSubmit, isLoading, errors } = useEditMatchSubmit(
+    router,
+    validateForm,
+    matchId,
+    matchData
+  );
+
   const onSubmitPress = () => {
     console.log("Submitting form data:", formData);
     handleSubmit(formData);
   };
-
-  const { handleSubmit, isLoading, errors } = useEditMatchSubmit(
-    navigation,
-    validateForm,
-    matchData.id,
-    matchData
-  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -71,9 +70,8 @@ const EditMatchScreen = ({ route, navigation }: EditMatchScreenProps) => {
         <Header
           title="매치 수정"
           subtitle="매치 정보를 수정해보세요"
-          navigation={navigation}
           backText="마이 페이지"
-          onBack={() => navigation.goBack()}
+          onBack={() => router.push("/(tabs)/mypage")}
         />
 
         <TitleInput
@@ -113,6 +111,7 @@ const EditMatchScreen = ({ route, navigation }: EditMatchScreenProps) => {
           error={errors.datetime}
           showPicker={showDatePicker}
           onPress={() => setShowDatePicker(true)}
+          onPickerClose={() => setShowDatePicker(false)}
         />
 
         <LevelSelector
