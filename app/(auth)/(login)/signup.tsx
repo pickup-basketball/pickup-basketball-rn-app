@@ -1,17 +1,14 @@
 import React, { useState } from "react";
 import { SafeAreaView, StyleSheet, View, Alert } from "react-native";
-import SignupStep1 from "../../components/auth/signup/SignupStep1";
-import SignupStep2 from "../../components/auth/signup/SignupStep2";
-import { TSignupForm } from "../../types/signup";
-import Header from "../../components/common/Header";
-import SignupTitle from "../../components/auth/signup/SignupTitle";
-import LoginLink from "../../components/auth/login/LoginLink";
-import axiosInstance from "../../api/axios-interceptor";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../../types/navigation";
-import { handleLogin } from "../../utils/auth/handleLogin";
-import { LoginSuccessModal } from "../../components/auth/login/LoginSuccessModal";
+import { TSignupForm } from "../../../src/types/signup";
+import axiosInstance from "../../../src/api/axios-interceptor";
+import { handleLogin } from "../../../src/utils/auth/handleLogin";
+import SignupTitle from "../../../src/components/auth/signup/SignupTitle";
+import SignupStep1 from "../../../src/components/auth/signup/SignupStep1";
+import SignupStep2 from "../../../src/components/auth/signup/SignupStep2";
+import LoginLink from "../../../src/components/auth/login/LoginLink";
+import { LoginSuccessModal } from "../../../src/components/auth/login/LoginSuccessModal";
+import { useRouter } from "expo-router";
 
 type TStep1Data = {
   email: string;
@@ -20,7 +17,7 @@ type TStep1Data = {
 };
 
 const SignupScreen = () => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [signupData, setSignupData] = useState<TStep1Data | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -63,8 +60,7 @@ const SignupScreen = () => {
         const loginResult = await handleLogin({
           email: data.email,
           password: data.password,
-          navigation,
-          axiosInstance,
+          router,
           shouldNavigate: false,
           onError: (message) => {
             console.error("자동 로그인 실패:", message);
@@ -72,10 +68,7 @@ const SignupScreen = () => {
               "로그인 오류",
               "회원가입은 완료되었으나 자동 로그인에 실패했습니다. 다시 로그인해주세요."
             );
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "Login" }],
-            });
+            router.replace("/(auth)/login");
           },
           onSuccess: () => {
             setShowSuccessModal(true);
@@ -83,7 +76,7 @@ const SignupScreen = () => {
         });
 
         if (!loginResult) {
-          navigation.navigate("Login");
+          router.replace("/(auth)/login");
         }
       }
     } catch (error) {
@@ -94,18 +87,13 @@ const SignupScreen = () => {
 
   const handleModalClose = () => {
     setShowSuccessModal(false);
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "MainTab", params: { screen: "Guide" } }],
-    });
+    router.replace("/(tabs)/guide");
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
       <View style={styles.formContainer}>
         <SignupTitle step={step} />
-
         {step === 1 ? (
           <SignupStep1 onNext={handleStep1Complete} />
         ) : (

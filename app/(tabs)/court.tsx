@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { View, Text, StyleSheet, SafeAreaView, FlatList } from "react-native";
-import LoggedInHeader from "../../components/common/LoggedInHeader";
-import { colors } from "../../styles/colors";
-import axiosInstance from "../../api/axios-interceptor";
-import CourtDetailModal from "../../components/courts/CourtDetailModal";
-import { Court } from "../../types/court";
-import { CourtCard } from "../../components/courts/CourtCard";
-import { CourtsHeader } from "../../components/courts/CourtHeader";
-import { LocationFilter } from "../../components/courts/LocationFilter";
+import { Court } from "../../src/types/court";
+import axiosInstance from "../../src/api/axios-interceptor";
+import LoggedInHeader from "../../src/components/common/LoggedInHeader";
+import { CourtsHeader } from "../../src/components/courts/CourtHeader";
+import { LocationFilter } from "../../src/components/courts/LocationFilter";
+import CourtDetailModal from "../../src/components/courts/CourtDetailModal";
+import { CourtCard } from "../../src/components/courts/CourtCard";
+import { colors } from "../../src/styles/colors";
 
 const CourtsScreen = () => {
   const [courts, setCourts] = useState<Court[]>([]);
@@ -54,7 +54,6 @@ const CourtsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <LoggedInHeader />
       <CourtsHeader viewMode={viewMode} onViewModeChange={setViewMode} />
       <LocationFilter
         locations={locations}

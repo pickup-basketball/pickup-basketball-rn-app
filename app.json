@@ -8,6 +8,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "jsEngine": "jsc",
+    "scheme": "pickup",
     "splash": {
       "image": "./assets/logo/logo.png",
       "resizeMode": "contain",
@@ -28,7 +29,8 @@
     },
     "plugins": [
       "@react-native-firebase/app",
-      "@react-native-firebase/messaging"
+      "@react-native-firebase/messaging",
+      "expo-router"
     ],
     "web": {
       "favicon": "./assets/favicon.png"

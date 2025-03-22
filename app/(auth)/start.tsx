@@ -8,22 +8,18 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import type { TNavigationProp } from "../../types/navigation";
 import {
   Design1,
   Design2,
   Design3,
   Design4,
-} from "../../components/landing/LandingElement";
+} from "../../src/components/landing/LandingElement";
+import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
 const StartScreen = () => {
-  const navigation = useNavigation<TNavigationProp>();
-  const handleStart = async () => {
-    navigation.navigate("Login");
-  };
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(0);
 
   const handleScroll = (event: any) => {
@@ -77,7 +73,10 @@ const StartScreen = () => {
         ))}
       </ScrollView>
 
-      <TouchableOpacity style={styles.startButton} onPress={handleStart}>
+      <TouchableOpacity
+        style={styles.startButton}
+        onPress={() => router.push("/login")}
+      >
         <Text style={styles.buttonText}>시작하기</Text>
       </TouchableOpacity>
     </SafeAreaView>

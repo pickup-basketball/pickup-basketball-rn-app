@@ -3,14 +3,15 @@ import { StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ArrowLeft } from "lucide-react-native";
 import { TNavigationProp } from "../../types/navigation";
+import { useRouter } from "expo-router";
 
 const Header = () => {
-  const navigation = useNavigation<TNavigationProp>();
+  const router = useRouter();
   return (
     <View style={styles.header}>
       <Text style={styles.logo}>PICKUP</Text>
       <TouchableOpacity
-        onPress={() => navigation.navigate("Start")}
+        onPress={() => router.push("start")}
         style={styles.mainButton}
       >
         <View style={styles.buttonContent}>

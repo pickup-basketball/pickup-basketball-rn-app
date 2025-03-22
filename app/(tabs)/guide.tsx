@@ -1,20 +1,18 @@
-import LoggedInHeader from "../../components/common/LoggedInHeader";
 import React from "react";
 import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
+import LoggedInHeader from "../../src/components/common/LoggedInHeader";
 import {
-  GuideHeader,
-  QuickGuide,
+  ContactSection,
   DetailGuide,
   FaqSection,
-  ContactSection,
-} from "../../components/main/GuidItem";
-import { colors } from "../../styles/colors";
-import PushPermissionModal from "../../components/permission/PushPermissionModal";
+  GuideHeader,
+  QuickGuide,
+} from "../../src/components/main/GuidItem";
+import { colors } from "../../src/styles/colors";
 
 const GuideScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <LoggedInHeader />
       <ScrollView>
         <GuideHeader />
         <QuickGuide />
